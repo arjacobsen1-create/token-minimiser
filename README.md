@@ -72,6 +72,36 @@ tokenizers on a golden set, the errors are published in
 tokenizer is wired in (the live demo loads one), and every other count
 is labelled an estimate with its measured error.
 
+
+## What this measures, and what it doesn't
+
+**It measures**
+
+- **Input tokens** — the prompt as written, and the same prompt after
+  automatic compression, counted. Exact for GPT models when the real
+  o200k_base tokenizer is wired in (the live demo loads one); labelled
+  estimates for other models, with the measured error published in
+  ACCURACY.md.
+- **Predicted output tokens** — what the prompt, as written, is likely to
+  provoke, forecast from the type of task; and the capped output once an
+  explicit output limit (Gentle, Balanced or Aggressive) is attached.
+- **Predicted total saving** — input plus output, before and after. This is
+  the figure the dashboard leads with.
+
+**It doesn't measure**
+
+- **Proven savings.** Every saving here is predicted. A saving is only proven
+  when measured against an actual model response.
+- **Quality.** A shorter answer is not automatically a better one; the
+  control levels trade completeness for cost, and the trade is shown, not hidden.
+- **Vendor consumption units** (SAP AI Units and the like). Vendors set
+  conversion rates per scenario; this measures the token driver underneath.
+
+**If you pay a flat subscription**, read the dollar figures as an
+API-equivalent yardstick: they size and compare prompts and show what burns
+the allowance you already bought. **If you pay per token or in consumption
+units**, they are a direct forecast.
+
 ## Live demo
 
 **https://arjacobsen1-create.github.io/token-minimiser/** — the app running in your browser, on the same engine as `src/`.
@@ -88,6 +118,7 @@ pass, the engine works. The command-line demo is `node src/demo.js`.
 ## A note on prices and counting
 
 Model prices in `src/minimiser-core.js` are editable defaults — verify
-against the provider's current pricing page. Counting v1 uses a calibrated
-heuristic; the production step is each model's real tokenizer (one function
-swap, by design).
+against the provider's current pricing page. Counting runs two ways: a
+calibrated heuristic by default, and exact counts for GPT models when the
+real o200k_base tokenizer is wired in (the live demo loads one). Other
+models stay labelled estimates; the measured error table is in ACCURACY.md.
