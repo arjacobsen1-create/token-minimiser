@@ -104,7 +104,11 @@ units**, they are a direct forecast.
 
 ## Live demo
 
-**https://arjacobsen1-create.github.io/token-minimiser/** — the app running in your browser, on the same engine as `src/`.
+**Guided demo: https://arjacobsen1-create.github.io/token-minimiser/demo.html** — three real prompts stepped through, computed live by the same engine.
+
+**App: https://arjacobsen1-create.github.io/token-minimiser/** — the app running in your browser, on the same engine as `src/`.
+
+**Dashboard: https://arjacobsen1-create.github.io/token-minimiser/dashboard.html** — all samples, all control levels, the full comparison.
 
 ## Verify it works
 
@@ -122,3 +126,8 @@ against the provider's current pricing page. Counting runs two ways: a
 calibrated heuristic by default, and exact counts for GPT models when the
 real o200k_base tokenizer is wired in (the live demo loads one). Other
 models stay labelled estimates; the measured error table is in ACCURACY.md.
+
+## Licence
+
+Open source under the MIT License. Copyright (c) 2026 Anahita Jacobsen.
+See the [LICENSE](LICENSE) file in this repo.
