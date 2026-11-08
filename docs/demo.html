@@ -1,0 +1,645 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Token Minimiser — Guided Demo</title>
+<style>
+  :root{--bg:#f6f4fd;--ink:#241d4f;--muted:#6f6a93;--violet:#7c3aed;--violet2:#a855f7;--lav:#efeafd;--line:#ddd3f5;--green:#15803d;--mint:#e6f7ec}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+  .topbar{max-width:980px;margin:0 auto;padding:16px 16px 6px;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
+  .brand{display:flex;gap:11px;align-items:center}
+  .brand h1{font-size:23px;margin:0;color:#1d1845}
+  .brand .sub{color:var(--muted);font-size:13px}
+  .brand .by{color:var(--violet);font-size:12px;font-weight:700}
+  .tabs{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+  .tabs a{color:var(--ink);text-decoration:none;font-weight:600;font-size:14px;padding:8px 14px;border-radius:999px}
+  .tabs a.on{background:var(--lav);color:var(--violet)}
+  .tabs a.gh{border:1.5px solid #c9c2e8;background:#fff}
+  .wrap{max-width:980px;margin:0 auto;padding:8px 16px 10px}
+  .card{background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:20px;box-shadow:0 6px 22px rgba(80,60,180,.07);margin-bottom:14px}
+  .card h2{margin:0 0 6px;font-size:20px;color:#1d1845}
+  .card p.lead{color:var(--muted);font-size:14.5px;line-height:1.55;margin:0}
+  .dots{display:flex;gap:8px;align-items:center;margin:2px 0 12px}
+  .dot{width:11px;height:11px;border-radius:50%;background:#ddd3f5}
+  .dot.on{background:var(--violet)}
+  .stepct{font-size:12.5px;color:var(--muted);font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+  .lesson{background:var(--lav);border-radius:12px;padding:12px 14px;font-size:14.5px;line-height:1.55;margin:12px 0}
+  .plabel{font-size:12px;font-weight:800;color:var(--muted);letter-spacing:.05em;text-transform:uppercase;margin:14px 0 6px}
+  .prompt{background:#f4f1fe;border:1.5px solid var(--line);border-radius:12px;padding:13px 15px;font-size:14.5px;line-height:1.6;white-space:pre-wrap}
+  .prompt.mini{background:#fff;border-color:var(--violet2)}
+  .arrow{text-align:center;color:var(--violet);font-size:21px;margin:8px 0 0}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}
+  .stat{border:1.5px solid var(--line);border-radius:12px;padding:11px 12px;background:#fbfaff}
+  .stat .k{font-size:12px;color:var(--muted);font-weight:700}
+  .stat .v{font-size:16.5px;font-weight:800;margin-top:3px;color:#1d1845}
+  .stat .v .save{color:var(--green)}
+  .seg{display:inline-flex;border:1.5px solid var(--line);border-radius:999px;overflow:hidden;background:#fff}
+  .seg button{appearance:none;border:0;background:transparent;padding:9px 18px;font-size:14px;font-weight:700;color:var(--muted);cursor:pointer;font-family:inherit}
+  .seg button.on{background:linear-gradient(120deg,var(--violet),var(--violet2));color:#fff}
+  .navrow{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:18px;flex-wrap:wrap}
+  .btn{appearance:none;border:0;border-radius:999px;background:linear-gradient(120deg,var(--violet),var(--violet2));color:#fff;font-weight:800;padding:12px 22px;font-size:14.5px;cursor:pointer;font-family:inherit;text-decoration:none;display:inline-block}
+  .btn.ghost{background:#fff;color:var(--violet);border:1.5px solid var(--line)}
+  .btn[disabled]{opacity:.35;cursor:default}
+  .note{font-size:12.5px;color:var(--muted);line-height:1.55}
+  @media(max-width:760px){.stats{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="brand">
+    <svg width="36" height="36" viewBox="0 0 48 48" fill="none" aria-hidden="true"><path d="M40 6C22 8 10 18 8 34c-1 5 1 8 1 8s1-18 12-24C14 26 12 38 13 42c14 2 26-12 27-36Z" fill="#7c3aed"/><path d="M9 42C14 30 24 18 36 12" stroke="#c4b5fd" stroke-width="2.5"/></svg>
+    <div>
+      <h1>Token Minimiser</h1>
+      <div class="sub">Prompt Optimisation &amp; Token Reduction</div>
+      <div class="by">Built by Anahita Jacobsen</div>
+    </div>
+  </div>
+  <nav class="tabs">
+    <a href="./index.html">✦ App</a>
+    <a href="./dashboard.html">📊 Dashboard</a>
+    <a class="on" href="./demo.html">▶ Demo</a>
+    <a class="gh" href="https://github.com/arjacobsen1-create/token-minimiser">GitHub ↗</a>
+    <a href="https://arjacobsen1-create.github.io/token-estimator/">Estimator ↗</a>
+  </nav>
+</div>
+
+<div class="wrap">
+  <div class="card">
+    <h2>A 60-second guided tour</h2>
+    <p class="lead">Three real prompts, stepped through one at a time, with nothing to type. This page runs the <b>same engine as the app itself</b>: every number is computed live, not screenshotted. When a step surprises you, the buttons at the end take you into the app to try your own prompt, or into the dashboard to see all four samples and every control level at once.</p>
+  </div>
+
+  <div class="card">
+    <div class="dots" id="dots"></div>
+    <div class="stepct" id="stepct"></div>
+    <h2 id="steptitle" style="margin-top:6px"></h2>
+    <div class="lesson" id="lesson"></div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+      <div class="plabel" style="margin:0">Control level</div>
+      <div class="seg" id="seg">
+        <button data-lv="gentle">Gentle</button>
+        <button data-lv="balanced" class="on">Balanced</button>
+        <button data-lv="aggressive">Aggressive</button>
+      </div>
+    </div>
+
+    <div class="plabel">The prompt</div>
+    <div class="prompt" id="orig"></div>
+    <div class="arrow">↓ minimised ↓</div>
+    <div class="plabel">What the Minimiser sends instead</div>
+    <div class="prompt mini" id="mini"></div>
+
+    <div class="stats">
+      <div class="stat"><div class="k">Input tokens</div><div class="v" id="stIn"></div></div>
+      <div class="stat"><div class="k">Predicted reply</div><div class="v" id="stOut"></div></div>
+      <div class="stat"><div class="k">Total per run</div><div class="v" id="stTot"></div></div>
+      <div class="stat"><div class="k">Cost per run</div><div class="v" id="stCost"></div></div>
+    </div>
+    <p class="note" id="taskline" style="margin-top:12px"></p>
+
+    <div class="navrow">
+      <button class="btn ghost" id="prev">← Back</button>
+      <div id="cta" style="display:none;gap:10px;flex-wrap:wrap">
+        <a class="btn" href="./index.html">Try it with your own prompt →</a>
+        <a class="btn ghost" href="./dashboard.html">See the full dashboard →</a>
+      </div>
+      <button class="btn" id="next">Next →</button>
+    </div>
+  </div>
+
+  <p class="note" id="countnote">Counting: loading the real tokenizer…</p>
+  <p class="note">Outputs are predicted from task type, not measured from a live model call; the method and the measured counting errors are published in ACCURACY.md in the repo. Dollar figures are API-equivalent at GPT-6 default prices; on a flat subscription they measure allowance burn, not a bill.</p>
+</div>
+<p style="text-align:center;font-size:12px;color:#8b85ad;padding:20px 12px 28px;margin:0">Open source under the <a href="https://github.com/arjacobsen1-create/token-minimiser" style="color:#7c3aed">MIT License</a> · © 2026 Anahita Jacobsen</p>
+
+<script>var module = { exports: {} };</script>
+<script>(function(){
+/**
+ * minimiser-core.js — the engine of the Token Minimiser app.
+ *
+ * The Estimator app MEASURES. This app INTERVENES:
+ * it takes a prompt and returns a smaller prompt that does the same job,
+ * plus the numbers that prove the saving.
+ *
+ * *** v0.2 — THE LESSON THE FOUNDING TEST TAUGHT US (29 Oct 2026) ***
+ * v0.1 only counted and shrank the PROMPT (input tokens). That is not
+ * the whole bill. A tiny prompt ("digital transformation pathway for a
+ * 1000-employee company" — about 18 input tokens) can trigger a huge
+ * answer, and OUTPUT tokens cost 3–5x more than input tokens.
+ * So v0.2 minimises the TOTAL:
+ *   1. INPUT  — compress the prompt (strip packaging, keep payload).
+ *   2. OUTPUT — predict the answer size BY THE DELIVERABLE ASKED FOR
+ *               (not by prompt length), then add an output-control
+ *               clause to the rewritten prompt that caps it.
+ * The control clause can make the prompt slightly LONGER while making
+ * the total far cheaper. That trade is the whole point, and the report
+ * shows it openly instead of hiding it.
+ *
+ *   countTokens()     — shared counting engine (same heuristic as the
+ *                       Estimator; the two apps are siblings, not rivals)
+ *   detectTaskType()  — what deliverable is this prompt asking for?
+ *   predictOutput()   — how big an answer will that deliverable be?
+ *   compressPrompt()  — rule-based compression: strip the packaging,
+ *                       keep the payload
+ *   minimiseReport()  — before/after INPUT, predicted OUTPUT, TOTAL
+ *                       tokens, % saved and $ saved per model
+ *   STRATEGIES        — the wider playbook rules alone can't do
+ *
+ * Read it top to bottom — it's written to be learned from.
+ * See LEARNING.md for the matching lessons.
+ */
+
+"use strict";
+
+// ---------------------------------------------------------------------------
+// 1. COUNTING (shared with the Estimator app)
+// ---------------------------------------------------------------------------
+// v1 heuristic: tokens ≈ characters / charsPerToken, blended with a
+// word-based estimate (words / 0.75). Production swaps this one function
+// for each model's real tokenizer — nothing else changes.
+// Prices are EDITABLE DEFAULTS — verify before relying on a $ figure.
+// NOTE: models charge DIFFERENT prices for input and output tokens.
+// Output is the expensive direction (here: 5x on the frontier models).
+// ---------------------------------------------------------------------------
+
+const MODELS = {
+  "gpt-6": { label: "GPT-6 (frontier)", charsPerToken: 4.0, inputPerMillion: 5.0, outputPerMillion: 25.0, tokenizer: "o200k_base" },
+  "claude-opus-5": { label: "Claude Opus 5 (frontier)", charsPerToken: 3.9, inputPerMillion: 5.0, outputPerMillion: 25.0 },
+  "claude-haiku-5-5": { label: "Claude Haiku 5.5 (fast/cheap)", charsPerToken: 3.9, inputPerMillion: 1.0, outputPerMillion: 5.0 },
+  "gemini-4-argon": { label: "Gemini 4 Argon (frontier)", charsPerToken: 4.1, inputPerMillion: 4.0, outputPerMillion: 20.0 },
+  "mercury-3": { label: "Mercury 3 (diffusion, speed)", charsPerToken: 4.0, inputPerMillion: 0.2, outputPerMillion: 0.7 },
+};
+
+// ACCURACY (2026-11-08): the heuristic below was measured against real
+// tokenizers on a golden set (see the Estimator repo's ACCURACY.md — the
+// two apps share this counter). It overstates long prose ~30% and
+// understates code/JSON/numbers 35–60%. So models with a published
+// tokenizer (GPT family, o200k_base) are counted EXACTLY once a real
+// counter is wired in via setExactCounter(); the rest stay labelled
+// estimates with the measured error published.
+let exactCounter = null;
+
+/** Wire in a real tokenizer: setExactCounter(text => encode(text).length). */
+function setExactCounter(fn) {
+  exactCounter = fn;
+}
+
+/** "exact" when a real tokenizer is wired for this model, else "estimate". */
+function countingMethod(modelId) {
+  const model = MODELS[modelId] || MODELS["gpt-6"];
+  return exactCounter && model.tokenizer ? "exact" : "estimate";
+}
+
+function countTokensHeuristic(text, modelId) {
+  if (!text) return 0;
+  const model = MODELS[modelId] || MODELS["gpt-6"];
+  const byChars = text.length / model.charsPerToken;
+  const words = text.trim().split(/\s+/).filter(Boolean).length;
+  const byWords = words / 0.75;
+  return Math.round((byChars + byWords) / 2);
+}
+
+function countTokens(text, modelId) {
+  if (!text) return 0;
+  const model = MODELS[modelId] || MODELS["gpt-6"];
+  if (exactCounter && model.tokenizer) return exactCounter(text);
+  return countTokensHeuristic(text, modelId);
+}
+
+// ---------------------------------------------------------------------------
+// 2. WHAT DELIVERABLE IS BEING ASKED FOR? (output prediction)
+// ---------------------------------------------------------------------------
+// Output size follows the DELIVERABLE, not the prompt length.
+// "Summarise this" over 5,000 tokens of report produces a small answer;
+// 18 tokens asking for a transformation pathway produce a huge one.
+// So each task type carries a TYPICAL answer size. Input-dependent
+// types (summarise, extract, translate) scale with the input instead —
+// the code says which is which, in the open.
+// These are starting defaults, meant to be tuned from real usage.
+// ---------------------------------------------------------------------------
+
+const TASK_TYPES = {
+  "long-form": {
+    label: "Long-form document (pathway, roadmap, strategy, report, plan)",
+    typicalOutput: 2000, // a pathway/roadmap answer, uncontrolled
+    formatHint: "a phased table with short bullet points",
+  },
+  draft: {
+    label: "Draft / write (email, letter, post, section)",
+    typicalOutput: 800,
+    formatHint: "the draft only, no preamble or explanation",
+  },
+  code: {
+    label: "Generate code",
+    typicalOutput: 1200,
+    formatHint: "code only, minimal comments",
+  },
+  summarise: {
+    label: "Summarise",
+    typicalOutput: 0, // input-dependent: ~25% of input, floor 80
+    formatHint: "bullet points only",
+  },
+  extract: {
+    label: "Extract data",
+    typicalOutput: 0, // input-dependent: ~35% of input, floor 100
+    formatHint: "a plain list, no commentary",
+  },
+  translate: {
+    label: "Translate",
+    typicalOutput: 0, // input-dependent: about the size of the input
+    formatHint: "the translation only",
+  },
+  classify: {
+    label: "Classify / label",
+    typicalOutput: 15,
+    formatHint: "the label only",
+  },
+  "short-answer": {
+    label: "Short answer / chat reply",
+    typicalOutput: 300,
+    formatHint: "a direct answer, no preamble",
+  },
+};
+
+// Keyword detection — checked in order, first match wins. Long-form is
+// checked before draft on purpose: "pathway" IS the deliverable, even
+// when the prompt has no verb like "write" in it.
+function detectTaskType(text) {
+  const t = (text || "").toLowerCase();
+  if (/\b(classify|label|categorise|categorize|tag)\b/.test(t)) return "classify";
+  if (/\b(extract|pull out|list the .* (from|in))\b/.test(t)) return "extract";
+  if (/\b(summarise|summarize|summary|tl;?dr)\b/.test(t)) return "summarise";
+  if (/\btranslate\b/.test(t)) return "translate";
+  if (/\b(code|function|script|sql|regex|debug)\b/.test(t)) return "code";
+  if (/\b(pathway|roadmap|strategy|strategic|transformation|report|plan|proposal|guide|blueprint|framework)\b/.test(t)) return "long-form";
+  if (/\b(write|draft|compose|email|letter|post|article|essay)\b/.test(t)) return "draft";
+  return "short-answer";
+}
+
+function predictOutput(text, inputTokens, taskType) {
+  const type = TASK_TYPES[taskType] || TASK_TYPES["short-answer"];
+  if (taskType === "summarise") return Math.max(80, Math.round(inputTokens * 0.25));
+  if (taskType === "extract") return Math.max(100, Math.round(inputTokens * 0.35));
+  if (taskType === "translate") return Math.max(20, inputTokens);
+  return type.typicalOutput;
+}
+
+// *** v0.3 — A PREDICTION IS A RANGE, NOT A NUMBER (29 Oct 2026) ***
+// The follow-up doubt was correct: v0.2 showed "~2,200 out ·
+// $0.033" in big bold type, and 2,200 was an assumed typical — a quick
+// answer could be half of it, a thorough one half as much again.
+// Presenting a guess as a point figure overstates certainty, so the
+// prediction now carries a low–high band (roughly 0.55x–1.6x the
+// typical for deliverable-sized tasks) and every cost derived from it
+// is a range too. Fixed-size tasks (classify) and input-bound tasks
+// (translate) get narrow bands, because their answers really are
+// predictable. Round bands to the nearest 50 so they LOOK estimated.
+function roundTo50(n) {
+  return Math.max(10, Math.round(n / 50) * 50);
+}
+
+function predictOutputRange(text, inputTokens, taskType) {
+  const typical = predictOutput(text, inputTokens, taskType);
+  if (taskType === "classify") return { low: 10, typical, high: 20 };
+  if (taskType === "translate")
+    return { low: Math.round(typical * 0.9), typical, high: Math.round(typical * 1.1) };
+  if (taskType === "summarise")
+    return { low: Math.max(50, Math.round(typical * 0.6)), typical, high: Math.round(typical * 1.6) };
+  if (taskType === "extract")
+    return { low: Math.max(50, Math.round(typical * 0.7)), typical, high: Math.round(typical * 1.4) };
+  return { low: roundTo50(typical * 0.55), typical, high: roundTo50(typical * 1.6) };
+}
+
+// ---------------------------------------------------------------------------
+// 3. RULE-BASED COMPRESSION (the input side)
+// ---------------------------------------------------------------------------
+// Models don't need politeness filler, throat-clearing, or repeated
+// instructions — people do. Stripping them costs the model nothing and
+// saves tokens on EVERY call, forever. Rules first: predictable and free.
+// (An AI rewriter can go further; it's the premium step, not the first one.)
+// ---------------------------------------------------------------------------
+
+const REPLACEMENTS = [[/\bin order to\b/gi, "to"]];
+
+const FILLER_PHRASES = [
+  /\bplease note that\b/gi,
+  /\bi would like you to\b/gi,
+  /\bi want you to\b/gi,
+  /\bplease\b/gi,
+  /\bkindly\b/gi,
+  /\bas you know,?\b/gi,
+  /\bit is important to note that\b/gi,
+];
+
+function compressPrompt(text) {
+  let out = text;
+  for (const [pattern, replacement] of REPLACEMENTS) {
+    out = out.replace(pattern, replacement);
+  }
+  for (const pattern of FILLER_PHRASES) {
+    out = out.replace(pattern, "");
+  }
+  out = out
+    .replace(/[ \t]+/g, " ") // collapse runs of spaces
+    .replace(/\n{3,}/g, "\n\n") // collapse blank-line piles
+    .replace(/\s+([.,!?;:])/g, "$1") // tidy spaces left before punctuation
+    .replace(/([.!?])\s*,\s*/g, "$1 ") // filler removal can leave "report., we" — tidy it
+    .replace(/,\s*,/g, ",") // and doubled commas
+    .replace(/^\s*[.,]\s*/, "") // a leading orphan punctuation mark
+    .trim();
+  // A sentence that survives compression starts capitalised, even if
+  // filler removal exposed it mid-string ("...report. we need...").
+  out = out.replace(/([.!?]\s+)([a-z])/g, (m, p, c) => p + c.toUpperCase());
+  // Capitalise the first letter — compression shouldn't look sloppy.
+  return out ? out.charAt(0).toUpperCase() + out.slice(1) : out;
+}
+
+// ---------------------------------------------------------------------------
+// 4. OUTPUT CONTROL (the output side — where the real money is)
+// ---------------------------------------------------------------------------
+// The strongest minimising move for most prompts is not shrinking the
+// question, it's capping the answer: name the format, cap the length.
+// Levels mirror the compression levels the app already offers:
+//   gentle   — keep ~70% of the typical answer
+//   balanced — keep ~50%
+//   aggressive — keep ~30% (never below a usable floor per type)
+// The clause COSTS a few input tokens. The report counts that cost
+// honestly — total is what matters, not prompt length alone.
+// ---------------------------------------------------------------------------
+
+const CONTROL_LEVELS = {
+  gentle: { label: "Gentle", keep: 0.7 },
+  balanced: { label: "Balanced", keep: 0.5 },
+  aggressive: { label: "Aggressive", keep: 0.3 },
+};
+
+const OUTPUT_FLOORS = { classify: 15, "long-form": 250, draft: 150, code: 200, "short-answer": 80 };
+
+function controlledOutput(taskType, predictedOutput, level = "balanced") {
+  if (taskType === "translate" || taskType === "classify") return predictedOutput; // can't shrink these without losing the work
+  const keep = (CONTROL_LEVELS[level] || CONTROL_LEVELS.balanced).keep;
+  const floor = OUTPUT_FLOORS[taskType] || 50;
+  return Math.max(floor, Math.round(predictedOutput * keep));
+}
+
+function outputControlClause(taskType, targetTokens) {
+  if (taskType === "translate" || taskType === "classify") return ""; // no useful cap exists
+  const hint = TASK_TYPES[taskType].formatHint;
+  return `Output: ${hint}, max ~${targetTokens} tokens. No preamble or repetition.`;
+}
+
+// Build the full minimised prompt: compressed question + control clause.
+function buildMinimisedPrompt(text, opts = {}) {
+  const taskType = opts.taskType || detectTaskType(text);
+  const inputTokens = countTokens(text, opts.modelId);
+  const predicted = predictOutput(text, inputTokens, taskType);
+  const target = controlledOutput(taskType, predicted, opts.level || "balanced");
+  const compressed = compressPrompt(text);
+  const clause = outputControlClause(taskType, target);
+  // Join cleanly: the clause is its own sentence, so the compressed
+  // prompt needs terminal punctuation before it.
+  const joined = clause
+    ? `${/[.!?]$/.test(compressed) ? compressed : compressed + "."} ${clause}`
+    : compressed;
+  return {
+    taskType,
+    taskLabel: TASK_TYPES[taskType].label,
+    predictedOutput: predicted,
+    outputRange: predictOutputRange(text, inputTokens, taskType),
+    controlledOutput: target,
+    compressed,
+    clause,
+    prompt: joined,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// 5. THE REPORT — input + output = total, before and after
+// ---------------------------------------------------------------------------
+// Cost per side uses that side's own price: input tokens are billed at
+// inputPerMillion, output tokens at outputPerMillion. The $ saving is
+// almost always dominated by the output side — the report shows both
+// so the user can see WHY the total moved.
+// ---------------------------------------------------------------------------
+
+function minimiseReport(text, modelId, opts = {}) {
+  const model = MODELS[modelId] || MODELS["gpt-6"];
+  const built = buildMinimisedPrompt(text, { ...opts, modelId });
+
+  const inputBefore = countTokens(text, modelId);
+  const inputAfter = countTokens(built.prompt, modelId); // includes the control clause's cost
+  const outputBefore = built.predictedOutput;
+  const outputAfter = built.controlledOutput;
+
+  const totalBefore = inputBefore + outputBefore;
+  const totalAfter = inputAfter + outputAfter;
+
+  const cost = (input, output) =>
+    (input / 1e6) * model.inputPerMillion + (output / 1e6) * model.outputPerMillion;
+  const costBefore = cost(inputBefore, outputBefore);
+  const costAfter = cost(inputAfter, outputAfter);
+
+  // v0.3: every $ figure is a RANGE, derived from the output range —
+  // and every $ figure is API-EQUIVALENT cost (see billingModes below).
+  const range = built.outputRange;
+  const costBeforeRange = {
+    low: cost(inputBefore, range.low),
+    typical: costBefore,
+    high: cost(inputBefore, range.high),
+  };
+
+  const savedTotal = totalBefore - totalAfter;
+  return {
+    model: model.label,
+    taskType: built.taskType,
+    taskLabel: built.taskLabel,
+    compressed: built.prompt, // the full minimised prompt (compressed + control clause)
+    controlClause: built.clause,
+    // Input side (field names kept from v0.1 so existing callers work;
+    // "before/after" have always meant the INPUT count)
+    before: inputBefore,
+    after: inputAfter,
+    savedTokens: inputBefore - inputAfter, // can be negative — the clause costs input tokens on purpose
+    savedPct: inputBefore ? Math.round(((inputBefore - inputAfter) / inputBefore) * 100) : 0,
+    savedCostPerRun: (inputBefore - inputAfter) / 1e6 * model.inputPerMillion,
+    // Output side (new in v0.2; range added in v0.3)
+    outputBefore,
+    outputRange: range,
+    outputAfter,
+    savedOutputTokens: outputBefore - outputAfter,
+    // Total (new in v0.2 — the number that actually matters)
+    totalBefore,
+    totalAfter,
+    savedTotalTokens: savedTotal,
+    savedTotalPct: totalBefore ? Math.round((savedTotal / totalBefore) * 100) : 0,
+    costBeforePerRun: costBefore,
+    costAfterPerRun: costAfter,
+    savedCostTotalPerRun: costBefore - costAfter,
+    // v0.3 ranges + volume context (API-equivalent $)
+    costBeforeRangePerRun: costBeforeRange,
+    costBeforePer1000Range: {
+      low: costBeforeRange.low * 1000,
+      typical: costBeforeRange.typical * 1000,
+      high: costBeforeRange.high * 1000,
+    },
+    // *** HOW THE USER PAYS changes what a token "costs" (v0.3) ***
+    // The point: a user on a flat monthly subscription can ask the
+    // same question there — no $0.033 charge appears. Both framings are
+    // true; they are true for DIFFERENT users, and an app that shows
+    // only the $ misleads the majority, who are on subscriptions.
+    billingModes: {
+      api: {
+        label: "Pay-per-token (API)",
+        note: "The $ ranges in this report are real charges at this model's per-token rates.",
+        marginalCostPerRun: costBeforeRange,
+      },
+      subscription: {
+        label: "Flat subscription (flat monthly chat plans)",
+        note: "Marginal cost per run is $0 — the plan is already paid. Tokens still matter: long answers and long context burn your usage allowance and bring limits/throttling closer, and they use up context window.",
+        marginalCostPerRun: { low: 0, typical: 0, high: 0 },
+      },
+    },
+  };
+}
+
+// ---------------------------------------------------------------------------
+// 6. THE WIDER PLAYBOOK
+// ---------------------------------------------------------------------------
+// Compression is one lever. These are the others — the app surfaces the
+// right ones based on what it sees in the prompt (long history? JSON?
+// repeated context?), with typical saving ranges.
+// ---------------------------------------------------------------------------
+
+const STRATEGIES = [
+  {
+    id: "strip-filler",
+    name: "Strip filler and repetition",
+    lever: "compression",
+    typicalSaving: "10–55% of the instruction text",
+    note: "What the automatic compressor does. Politeness is for people.",
+  },
+  {
+    id: "cap-output",
+    name: "Ask for the format, cap the length",
+    lever: "output",
+    typicalSaving: "output tokens cost 3–5x input — the answer is the bill",
+    note: "Now built into every minimised prompt (v0.2): the rewritten prompt carries a format + length cap, and the report shows input + predicted output as one total.",
+  },
+  {
+    id: "summarise-history",
+    name: "Summarise old conversation turns",
+    lever: "context",
+    typicalSaving: "50–90% of the history portion",
+    note: "Old turns are resent every call. A rolling summary replaces them.",
+  },
+  {
+    id: "retrieve-dont-paste",
+    name: "Retrieve chunks, don't paste whole documents",
+    lever: "context",
+    typicalSaving: "often 80%+ of the context portion",
+    note: "Send the paragraphs that matter, not the 40-page report.",
+  },
+  {
+    id: "lean-format",
+    name: "Lean formats instead of JSON",
+    lever: "format",
+    typicalSaving: "20–40% on structured data",
+    note: "Braces, quotes and repeated keys are tokens too. Lists and CSV are leaner.",
+  },
+  {
+    id: "cache-static",
+    name: "Cache the parts that never change",
+    lever: "billing",
+    typicalSaving: "up to ~90% on the cached portion",
+    note: "System prompts and reference docs resent every call can be prompt-cached at a discount.",
+  },
+  {
+    id: "fewer-steps",
+    name: "Fewer agent round-trips",
+    lever: "architecture",
+    typicalSaving: "compounds — the deepest saving there is",
+    note: "Every agent step resends the whole context. Plan first, then execute in fewer steps.",
+  },
+];
+
+module.exports = {
+  MODELS,
+  TASK_TYPES,
+  CONTROL_LEVELS,
+  STRATEGIES,
+  countTokens,
+  countTokensHeuristic,
+  setExactCounter,
+  countingMethod,
+  detectTaskType,
+  predictOutput,
+  predictOutputRange,
+  controlledOutput,
+  outputControlClause,
+  compressPrompt,
+  buildMinimisedPrompt,
+  minimiseReport,
+};
+
+})();</script>
+<script>
+  const m = module.exports;
+  const STEPS = [
+    { title: 'The polite email draft',
+      lesson: 'Most of the bill is the reply, not the prompt. Watch the input go UP slightly: the Minimiser deliberately spends a few input tokens on a control clause, because that clause caps hundreds of output tokens, and output is the expensive side.',
+      text: 'Write a polite email to the team explaining that the meeting has been moved to next week because several people are away and the room is not available and we need more time to prepare the materials and also remind them to bring their laptops and the latest reports and let me know if there are any problems with the new time or if anyone cannot make it.' },
+    { title: 'Tiny prompt, huge reply',
+      lesson: 'Six words in, a book out. The shortest prompt on this page triggers a large, unbounded predicted reply. This is the case the input-only tools miss completely: there is almost nothing to compress, so the entire saving comes from capping the output.',
+      text: 'Tell me everything about SAP.' },
+    { title: 'The detailed roadmap ask',
+      lesson: 'The bigger and vaguer the ask, the wider the control levels spread. Switch between Gentle and Aggressive on this step and watch the totals move: more control saves more, and constrains the answer harder. That trade-off is the whole product.',
+      text: 'Create a detailed roadmap for migrating our SAP landscape to the cloud including all phases, timelines, risks, resources, costs, governance, testing strategy, training plans, communication plans, rollback procedures, and success criteria, with examples for each section and explanations of why each step matters and what could go wrong if we skip it.' }
+  ];
+  let step = 0, level = 'balanced';
+  const $ = id => document.getElementById(id);
+  const cost = v => '$' + (v < 0.1 ? v.toFixed(3) : v.toFixed(2));
+
+  function draw() {
+    const s = STEPS[step];
+    const r = m.minimiseReport(s.text, 'gpt-6', { level });
+    $('dots').innerHTML = STEPS.map((_, i) => '<span class="dot' + (i === step ? ' on' : '') + '"></span>').join('');
+    $('stepct').textContent = 'Step ' + (step + 1) + ' of ' + STEPS.length;
+    $('steptitle').textContent = s.title;
+    $('lesson').textContent = s.lesson;
+    $('orig').textContent = s.text;
+    $('mini').textContent = r.compressed;
+    $('stIn').textContent = r.before.toLocaleString() + ' → ' + r.after.toLocaleString();
+    $('stOut').innerHTML = r.outputRange.low.toLocaleString() + '–' + r.outputRange.high.toLocaleString() + ' → capped ' + r.outputAfter.toLocaleString();
+    $('stTot').innerHTML = r.totalBefore.toLocaleString() + ' → ' + r.totalAfter.toLocaleString() + ' <span class="save">(−' + r.savedTotalPct + '%)</span>';
+    $('stCost').innerHTML = cost(r.costBeforePerRun) + ' → ' + cost(r.costAfterPerRun);
+    $('taskline').textContent = 'Task detected: ' + r.taskLabel + ' · Control level: ' + m.CONTROL_LEVELS[level].label + ' · Model prices: GPT-6 defaults.';
+    $('prev').disabled = step === 0;
+    $('next').style.display = step === STEPS.length - 1 ? 'none' : '';
+    $('cta').style.display = step === STEPS.length - 1 ? 'flex' : 'none';
+    document.querySelectorAll('#seg button').forEach(b => b.classList.toggle('on', b.getAttribute('data-lv') === level));
+  }
+  $('prev').addEventListener('click', () => { if (step > 0) { step--; draw(); } });
+  $('next').addEventListener('click', () => { if (step < STEPS.length - 1) { step++; draw(); } });
+  document.querySelectorAll('#seg button').forEach(b => b.addEventListener('click', () => { level = b.getAttribute('data-lv'); draw(); }));
+  draw();
+  window.__refresh = draw;
+</script>
+<script>
+  (function () {
+    var note = document.getElementById('countnote');
+    import('https://unpkg.com/gpt-tokenizer@4.1.0/esm/encoding/o200k_base.js')
+      .then(function (mm) {
+        m.setExactCounter(function (t) { return mm.encode(t).length; });
+        note.textContent = 'Counting: GPT models use the real o200k_base tokenizer — exact. Other models are estimates; measured errors are published in ACCURACY.md in the repo.';
+        if (window.__refresh) window.__refresh();
+      })
+      .catch(function () {
+        note.textContent = 'Counting: estimates (the real tokenizer could not be loaded). Measured errors are published in ACCURACY.md in the repo.';
+      });
+  })();
+</script>
+</body>
+</html>
