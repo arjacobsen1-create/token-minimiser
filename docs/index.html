@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Token Minimiser — Live Demo</title>
+<style>
+  :root{--ink:#17203a;--muted:#5b6478;--line:#d9deea;--bg:#f6f7fb;--green:#059669;--amber:#b45309;--red:#dc2626}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+  .wrap{max-width:860px;margin:0 auto;padding:24px 16px 44px}
+  h1{font-size:27px;margin:0 0 2px}
+  .byline{color:var(--amber);font-weight:700;font-size:13.5px;margin:0 0 14px}
+  .lede{color:var(--muted);font-size:15px;line-height:1.5;margin:0 0 18px}
+  .card{background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:16px;margin:0 0 14px}
+  label{font-weight:700;font-size:13px;display:block;margin:10px 0 5px}
+  label:first-child{margin-top:0}
+  textarea,select{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px;font-size:14.5px;font-family:inherit;background:#fff}
+  textarea{min-height:96px;resize:vertical}
+  button{appearance:none;border:0;border-radius:999px;background:var(--green);color:#fff;font-weight:800;font-size:15px;padding:12px 20px;cursor:pointer;margin-top:14px}
+  button.ghost{background:#eef2ff;color:#3730a3;border:1px solid #c7d2fe;margin-left:8px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px}
+  .stat{border:1px solid var(--line);border-radius:12px;padding:12px}
+  .stat .k{font-size:12px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+  .stat .v{font-size:21px;font-weight:900;margin-top:3px}
+  .stat .s{font-size:13px;color:var(--muted);margin-top:2px;line-height:1.45}
+  .mini{background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:12px;font-size:14.5px;line-height:1.55;white-space:pre-wrap}
+  .saved{color:var(--green);font-weight:900}
+  .note{font-size:13px;color:var(--muted);line-height:1.5}
+  #out{display:none}
+  @media(max-width:560px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Token Minimiser</h1>
+  <p class="byline">Built by Anahita Jacobsen · Live demo</p>
+  <p class="lede">Paste a prompt. The minimiser shrinks it, then does the part most tools skip: it predicts the <b>reply</b>, because a tiny prompt can trigger a huge, expensive answer. It minimises the total, input plus predicted output, and reports the saving as a range, framed by how you pay. Runs entirely in your browser, on the same engine as the code in this repo (<i>src/minimiser-core.js</i>).</p>
+
+  <div class="card">
+    <label for="prompt">Your prompt</label>
+    <textarea id="prompt">Please note that I would like you to please summarise the attached report. As you know, it is important to note that we need the summary in order to brief the team. Please keep it short.</textarea>
+    <label for="model">Model</label>
+    <select id="model"></select>
+    <button id="go">Minimise</button>
+    <button class="ghost" id="tiny">Try the tiny prompt instead</button>
+  </div>
+
+  <div class="card" id="out">
+    <div class="grid">
+      <div class="stat"><div class="k">Input</div><div class="v" id="inStat"></div><div class="s">Prompt tokens, before → after (the control clause can add a few, on purpose).</div></div>
+      <div class="stat"><div class="k">Predicted output</div><div class="v" id="outStat"></div><div class="s" id="outSub"></div></div>
+      <div class="stat"><div class="k">Total</div><div class="v" id="totStat"></div><div class="s" id="totSub"></div></div>
+      <div class="stat"><div class="k">Cost per run (API-equivalent)</div><div class="v" id="costStat"></div><div class="s">On a flat subscription the marginal cost is $0; tokens burn usage allowance instead. Both framings are in the full report in the code.</div></div>
+    </div>
+    <label>Minimised prompt</label>
+    <div class="mini" id="miniText"></div>
+  </div>
+
+  <p class="note">Full code, lesson notes and a runnable proof (<i>node test/smoke.js</i>, 4 checks, including the tiny-prompt lesson) are in the repository. Prices are editable defaults in the code; counting is a calibrated heuristic.</p>
+</div>
+
+<script>var module = { exports: {} };</script>
+<script src="../src/minimiser-core.js"></script>
+<script>
+  const core = module.exports;
+  const modelSel = document.getElementById('model');
+  Object.keys(core.MODELS).forEach(k => {
+    const o = document.createElement('option');
+    o.value = k; o.textContent = core.MODELS[k].label || k;
+    modelSel.appendChild(o);
+  });
+  function run() {
+    const text = document.getElementById('prompt').value;
+    const r = core.minimiseReport(text, modelSel.value);
+    document.getElementById('inStat').textContent = r.before + ' → ' + r.after;
+    document.getElementById('outStat').textContent =
+      (r.outputRange.low + '–' + r.outputRange.high) + ' → ' + r.outputAfter;
+    document.getElementById('outSub').textContent =
+      'Predicted reply range before, capped after. Task detected: ' + r.taskLabel + '.';
+    document.getElementById('totStat').innerHTML =
+      r.totalBefore + ' → ' + r.totalAfter + ' <span class="saved">(' + r.savedTotalPct + '% saved)</span>';
+    document.getElementById('totSub').textContent =
+      'Same work at volume: $' + r.costBeforePer1000Range.low.toFixed(0) + '–$' +
+      r.costBeforePer1000Range.high.toFixed(0) + ' per 1,000 runs before minimising.';
+    document.getElementById('costStat').textContent =
+      '$' + r.costBeforeRangePerRun.low.toFixed(3) + '–$' + r.costBeforeRangePerRun.high.toFixed(3) +
+      ' → $' + r.costAfterPerRun.toFixed(3);
+    document.getElementById('miniText').textContent = r.compressed;
+    document.getElementById('out').style.display = 'block';
+  }
+  document.getElementById('go').addEventListener('click', run);
+  document.getElementById('tiny').addEventListener('click', () => {
+    document.getElementById('prompt').value =
+      'I want a digital transformation pathway for a company with 1000 employees';
+    run();
+  });
+  run();
+</script>
+</body>
+</html>
