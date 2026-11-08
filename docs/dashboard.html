@@ -3,77 +3,193 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Token Minimiser — Dashboard</title>
+<title>Token Minimiser — Prompt Optimisation & Token Reduction</title>
 <style>
-  :root{--ink:#1c1a15;--muted:#5b6478;--line:#ddd3ba;--bg:#f6f1e7;--green:#059669;--blue:#2563eb;--red:#dc2626}
+  :root{--bg:#f6f4fd;--ink:#241d4f;--muted:#6f6a93;--violet:#7c3aed;--violet2:#a855f7;--lav:#efeafd;--line:#ddd3f5;--green:#15803d;--mint:#e6f7ec;--dark:#120e2a;--dpanel:#1c1742;--dline:#2e2760;--dink:#f0edff;--dmuted:#a49cd0}
   *{box-sizing:border-box}
   body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
-  header{background:#141310;color:#fff;padding:20px 16px 16px}
-  header .in{max-width:920px;margin:0 auto}
-  h1{font-size:26px;margin:0}
-  .byline{color:#fb923c;font-weight:700;font-size:13px;margin:3px 0 8px}
-  header p{color:#cbd5e1;font-size:14.5px;line-height:1.5;margin:0;max-width:760px}
-  header a{color:#fdba74;font-weight:700}
-  .wrap{max-width:920px;margin:0 auto;padding:18px 16px 44px}
-  .tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:0 0 14px}
-  .tile{background:#fffdf6;border:1.5px solid var(--line);border-radius:12px;padding:12px 13px}
-  .tile .n{font-size:24px;font-weight:900;color:#141310}
-  .tile .k{font-size:12px;font-weight:800;letter-spacing:.05em;color:var(--muted);text-transform:uppercase;margin-top:2px}
-  .tile .s{font-size:12.5px;color:var(--muted);margin-top:3px;line-height:1.4}
-  .card{background:#fffdf6;border:1.5px solid var(--line);border-radius:14px;padding:16px;margin:0 0 14px}
-  .card h2{margin:0 0 3px;font-size:18px}
-  .card .sub{color:var(--muted);font-size:13.5px;margin:0 0 10px;line-height:1.5}
-  .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin:0 0 12px}
-  .controls label{font-weight:700;font-size:13px;display:block;margin:0 0 5px}
-  select{border:1.5px solid var(--line);border-radius:10px;padding:9px;font-size:14px;font-family:inherit;background:#fff}
-  button{appearance:none;border:0;border-radius:999px;background:#ea580c;color:#fff;font-weight:800;font-size:14px;padding:10px 18px;cursor:pointer}
-  .chart{font-size:13px}
-  .crow{display:grid;grid-template-columns:200px 1fr 130px;gap:8px;align-items:center;margin:6px 0}
-  .crow .nm{line-height:1.35}
-  .track{background:#ece4cf;border-radius:6px;height:16px}
-  .fill{height:100%;border-radius:6px}
-  .val{font-weight:700;text-align:right}
-  .legend{font-size:12.5px;color:var(--muted);display:flex;gap:14px;margin:6px 0 2px}
+  .topbar{max-width:1180px;margin:0 auto;padding:16px 16px 8px;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
+  .brand{display:flex;gap:11px;align-items:center}
+  .brand h1{font-size:24px;margin:0;color:#1d1845}
+  .brand .sub{color:var(--muted);font-size:13px}
+  .brand .by{color:var(--violet);font-size:12px;font-weight:700}
+  .tabs{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+  .tabs a{color:var(--ink);text-decoration:none;font-weight:600;font-size:14px;padding:8px 14px;border-radius:999px}
+  .tabs a.on{background:var(--lav);color:var(--violet)}
+  .tabs a.gh{border:1.5px solid #c9c2e8;background:#fff}
+  .wrap{max-width:1180px;margin:0 auto;padding:6px 16px 0}
+  .ctl{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:4px 0 12px}
+  .ctl label{font-size:13px;color:var(--muted);font-weight:700}
+  select{border:1.5px solid var(--line);border-radius:10px;padding:9px;font-size:14px;font-family:inherit;background:#fff;color:var(--ink)}
+  .hero{display:grid;grid-template-columns:300px 1fr 240px;gap:14px;align-items:stretch;margin-bottom:14px}
+  .hcard{background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 6px 22px rgba(80,60,180,.07)}
+  .hcard .art{font-size:37px;text-align:center;margin:4px 0 8px}
+  .hcard h2{font-size:19px;margin:0 0 4px;text-align:center}
+  .hcard p{color:var(--muted);font-size:13.5px;text-align:center;margin:0 0 14px;line-height:1.5}
+  .cta{display:block;text-align:center;background:linear-gradient(120deg,var(--violet),var(--violet2));color:#fff;font-weight:800;text-decoration:none;padding:13px;border-radius:12px;font-size:15px}
+  .midcol{display:grid;grid-template-rows:auto auto;gap:14px}
+  .baRow{display:grid;grid-template-columns:1fr 44px 1fr;gap:10px;align-items:center}
+  .baTile{background:#f1eefc;border:1.5px solid var(--line);border-radius:16px;padding:14px 16px}
+  .baTile.after{background:#eadffc}
+  .chip{display:inline-block;font-size:11.5px;font-weight:800;padding:3px 11px;border-radius:999px;background:#ddd0fa;color:#4c1d95}
+  .baTile.after .chip{background:#c9a7f5}
+  .baTile .n{font-size:31px;font-weight:900;color:#1d1845;margin:3px 0 0}
+  .baTile .u{color:var(--muted);font-size:13px}
+  .baTile .s{color:var(--muted);font-size:12px;margin-top:3px}
+  .arrowCirc{width:40px;height:40px;border-radius:50%;background:var(--violet);color:#fff;display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:900;justify-self:center}
+  .statRow{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .stat{background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:14px 16px;box-shadow:0 6px 22px rgba(80,60,180,.07)}
+  .stat .k{font-size:13.5px;font-weight:700;color:var(--ink)}
+  .stat .v{font-size:26px;font-weight:900;margin-top:2px}
+  .stat.mint{background:var(--mint);border-color:#bfe8cd}
+  .stat.mint .v{color:var(--green)}
+  .ring{display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .donut{width:172px;height:172px;border-radius:50%;position:relative}
+  .donut .hole{position:absolute;inset:19px;background:#fff;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+  .donut .hole b{font-size:29px;color:#1d1845}
+  .donut .hole span{font-size:12px;color:var(--muted)}
+  .darkzone{background:var(--dark);margin-top:6px}
+  .darkwrap{max-width:1180px;margin:0 auto;padding:20px 16px 46px}
+  .two{display:grid;grid-template-columns:1.05fr 1fr;gap:14px}
+  .dcard{background:var(--dpanel);border:1.5px solid var(--dline);border-radius:16px;padding:16px;margin:0 0 14px}
+  .dcard h2{margin:0 0 10px;font-size:16.5px;color:#fff}
+  .dcard h2 .ic{color:var(--violet2);margin-right:7px}
+  table{width:100%;border-collapse:collapse;font-size:14px;color:var(--dink)}
+  th{color:var(--dmuted);font-weight:600;text-align:left;padding:7px 8px;border-bottom:1px solid var(--dline);font-size:12.5px}
+  td{padding:11px 8px;border-bottom:1px solid var(--dline)}
+  tr.lvl{cursor:pointer}
+  tr.sel td{background:linear-gradient(120deg,#5b21b6,#7c3aed)}
+  tr.sel td:first-child{border-radius:9px 0 0 9px} tr.sel td:last-child{border-radius:0 9px 9px 0}
+  .radio{display:inline-block;width:13px;height:13px;border:2px solid var(--dmuted);border-radius:50%;margin-right:9px;vertical-align:-2px}
+  tr.sel .radio{border-color:#fff;background:radial-gradient(circle,#fff 0 4px,transparent 5px)}
+  .hbar{display:grid;grid-template-columns:76px 1fr 62px;gap:9px;align-items:center;margin:11px 0;font-size:13.5px;color:var(--dink)}
+  .hbar .track{height:21px;background:transparent}
+  .hbar .fill{height:100%;border-radius:6px}
+  .hbar .val{font-weight:800;text-align:right}
+  .axis{display:flex;justify-content:space-between;color:var(--dmuted);font-size:11.5px;margin:2px 0 0 85px;border-top:1px solid var(--dline);padding-top:5px}
+  .chart{font-size:13px;color:var(--dink)}
+  .crow{display:grid;grid-template-columns:170px 1fr 150px;gap:8px;align-items:center;margin:5px 0}
+  .crow .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .track2{background:#2c2560;border-radius:6px;height:16px}
+  .pair{display:flex;height:16px;gap:2px}
+  .pair div{height:100%;border-radius:3px}
+  .legend{font-size:12.5px;color:var(--dmuted);display:flex;gap:14px;margin:6px 0 2px}
   .dot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
-  .note{font-size:13px;color:var(--muted);line-height:1.5}
-  @media(max-width:760px){.tiles{grid-template-columns:1fr 1fr}.crow{grid-template-columns:130px 1fr 110px}}
+  .sub2{color:var(--dmuted);font-size:13.5px;margin:0 0 10px;line-height:1.5}
+  .warnbox{background:#2a1a08;border:1.5px solid #92600f;border-radius:12px;padding:11px 13px;font-size:13.5px;line-height:1.5;color:#fde68a;margin:0 0 14px}
+  .note{font-size:13px;color:var(--dmuted);line-height:1.5}
+  .valid{display:flex;gap:10px;flex-wrap:wrap;font-size:12.5px;color:var(--dmuted)}
+  .valid span{border:1px solid var(--dline);border-radius:999px;padding:5px 11px;background:var(--dpanel)}
+  .play{font-size:13.5px;line-height:1.55;margin:4px 0 0;padding-left:18px;color:var(--dmuted)}
+  @media(max-width:900px){.hero{grid-template-columns:1fr}.two{grid-template-columns:1fr}.crow{grid-template-columns:118px 1fr 132px}}
 </style>
 </head>
 <body>
-<header><div class="in">
-  <h1>Token Minimiser — Dashboard</h1>
-  <p class="byline">Built by Anahita Jacobsen · Live dashboard</p>
-  <p>Every number here is computed in your browser by the minimiser engine itself, on the sample prompts below. No typed-in results. Change the control level and the savings move. The working tool is the <a href="./index.html">app</a>.</p>
-</div></header>
-<div class="wrap">
-  <div class="tiles">
-    <div class="tile"><div class="n" id="tLevels"></div><div class="k">Control levels</div><div class="s">Gentle, Balanced, Aggressive: how hard the reply gets capped.</div></div>
-    <div class="tile"><div class="n" id="tTypes"></div><div class="k">Deliverable types</div><div class="s">Output is predicted by what is asked for, not by prompt length.</div></div>
-    <div class="tile"><div class="n" id="tStrat"></div><div class="k">Playbook levers</div><div class="s">Compression is one. The dashboard's samples use the built-in two.</div></div>
-    <div class="tile"><div class="n">8 / 8</div><div class="k">Proof checks</div><div class="s">JavaScript 4 + Python 4, all passing. The ports agree value for value.</div></div>
-  </div>
-
-  <div class="card">
-    <h2>Savings on real prompt shapes</h2>
-    <p class="sub">Total tokens (input + predicted output), before vs minimised, on GPT-6. The wordy prompt shrinks. Watch the third row: the tiny prompt is the expensive one, and minimising is what tames it.</p>
-    <div class="controls">
-      <div><label for="level">Output control</label><select id="level"></select></div>
-      <button id="recalc">Recalculate</button>
+<div class="topbar">
+  <div class="brand">
+    <svg width="38" height="38" viewBox="0 0 48 48" fill="none" aria-hidden="true"><path d="M40 6C22 8 10 18 8 34c-1 5 1 8 1 8s1-18 12-24C14 26 12 38 13 42c14 2 26-12 27-36Z" fill="#7c3aed"/><path d="M9 42C14 30 24 18 36 12" stroke="#c4b5fd" stroke-width="2.5"/></svg>
+    <div>
+      <h1>Token Minimiser</h1>
+      <div class="sub">Prompt Optimisation &amp; Token Reduction</div>
+      <div class="by">Built by Anahita Jacobsen</div>
     </div>
-    <div class="legend"><span><span class="dot" style="background:#141310"></span>Before</span><span><span class="dot" style="background:#65a30d"></span>Minimised</span></div>
-    <div class="chart" id="saveChart"></div>
-    <p class="note" id="saveNote"></p>
   </div>
-
-  <div class="card">
-    <h2>Where the saving comes from</h2>
-    <p class="sub">Input vs output, before and after, for the wordy summary prompt. The input barely moves, the control clause can even add a token or two. The output is where the money was.</p>
-    <div class="chart" id="splitChart"></div>
-    <p><a href="./index.html"><b>Open the app →</b></a></p>
-  </div>
-
-  <p class="note">How you pay changes the framing, not the tokens: on a flat subscription the marginal cost per run is $0 and tokens burn usage allowance; on pay-per-token pricing the same totals are real charges. Both framings are in the engine's report. Status: public prototype.</p>
+  <nav class="tabs">
+    <a class="on" href="./dashboard.html">✦ Optimise</a>
+    <a href="#examples">▤ Prompts</a>
+    <a href="#levels">📊 Results</a>
+    <a href="#measures">ⓘ About</a>
+    <a class="gh" href="https://github.com/arjacobsen1-create/token-minimiser">GitHub ↗</a>
+    <a href="./index.html">App ↗</a>
+    <a href="https://arjacobsen1-create.github.io/token-estimator/">Estimator ↗</a>
+  </nav>
 </div>
+
+<div class="wrap">
+  <div class="ctl">
+    <label for="sample">Sample prompt</label>
+    <select id="sample"></select>
+    <span style="font-size:12.5px;color:var(--muted)">Pick a control level in the table below; the whole page follows it. All figures are predicted, computed live.</span>
+  </div>
+
+  <div class="hero">
+    <div class="hcard">
+      <div class="art">📄 <span style="color:var(--violet)">➜</span> 📋</div>
+      <h2>Optimise your prompts</h2>
+      <p>Reduce tokens, preserve the intent,<br>and lower cost.</p>
+      <a class="cta" href="./index.html">✦ Optimise Prompt</a>
+      <p style="margin-top:12px;font-size:12.5px">Use fewer tokens. Preserve the intent.</p>
+    </div>
+    <div class="midcol">
+      <div class="baRow">
+        <div class="baTile"><span class="chip">Before</span><div class="n" id="baBefore"></div><div class="u">Predicted Tokens</div><div class="s" id="baBeforeSplit"></div></div>
+        <div class="arrowCirc">→</div>
+        <div class="baTile after"><span class="chip">After</span><div class="n" id="baAfter"></div><div class="u">Predicted Tokens</div><div class="s" id="baAfterSplit"></div></div>
+      </div>
+      <div class="statRow">
+        <div class="stat"><div class="k">🪙 Estimated Cost Savings</div><div class="v" id="statCost"></div><div class="u" style="color:var(--muted);font-size:12.5px">per run, at GPT-6 default prices</div></div>
+        <div class="stat mint"><div class="k">🍃 Total Token Reduction</div><div class="v" id="statTok"></div><div class="u" style="color:var(--green);font-size:12.5px">predicted tokens saved per run</div></div>
+      </div>
+    </div>
+    <div class="hcard ring">
+      <div class="donut" id="donut"><div class="hole"><b id="ringPct"></b><span>Token Reduction</span></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="darkzone"><div class="darkwrap">
+  <div class="two" id="levels">
+    <div class="dcard" style="margin:0">
+      <h2><span class="ic">⧉</span>Control Level Comparison</h2>
+      <table>
+        <tr><th>Control Level</th><th>Predicted Tokens</th><th>Reduction</th><th>Est. Cost per Run</th></tr>
+        <tbody id="lvlBody"></tbody>
+      </table>
+      <p class="note" style="margin-top:9px">Tap a row to make it the page's control level. More control saves more, and constrains the reply harder.</p>
+    </div>
+    <div class="dcard" style="margin:0">
+      <h2><span class="ic">📊</span>Token Comparison by Control Level</h2>
+      <div id="bars"></div>
+      <div class="axis" id="axis"></div>
+    </div>
+  </div>
+  <div style="height:14px"></div>
+
+  <div class="dcard" id="analysis">
+    <h2><span class="ic">📄</span>Prompt Analysis</h2>
+    <p class="sub2">Where the predicted saving comes from, for the selected sample and control level.</p>
+    <table>
+      <tr><th>Component</th><th>Original (tokens)</th><th>Optimised (tokens)</th><th>Change</th><th>Notes</th></tr>
+      <tbody id="anaBody"></tbody>
+    </table>
+  </div>
+
+  <div class="dcard" id="examples">
+    <h2><span class="ic">▤</span>Sample Prompts at Balanced</h2>
+    <p class="sub2">Predicted totals before (violet) and after (lime) across all four sample prompts.</p>
+    <div class="legend"><span><span class="dot" style="background:#7c3aed"></span>Before</span><span><span class="dot" style="background:#a3e635"></span>After minimising</span></div>
+    <div class="chart" id="chart"></div>
+  </div>
+
+  <div class="dcard" id="measures">
+    <h2><span class="ic">ⓘ</span>What this measures, and what it doesn't</h2>
+    <p class="sub2"><b style="color:#fff">Measures:</b> input tokens, counted (exact for GPT models); predicted output tokens by task type; and the predicted total saving once an output cap is attached. <b style="color:#fff">Doesn't measure:</b> proven savings (only an actual model response proves one), answer quality, or vendor consumption units such as SAP AI Units, whose conversion rates vendors set per scenario. On a flat subscription the dollar figures are an API-equivalent yardstick for what burns your allowance; on per-token or consumption pricing they are a direct forecast.</p>
+  </div>
+
+  <div class="warnbox"><b>Accuracy safeguard:</b> everything on this page is a <b>predicted</b> saving. Input counts are real (exact for GPT models); the output side is estimated from task-type behaviour and the control level you set. A saving is only proven when measured against an actual model response.</div>
+
+  <div class="dcard">
+    <h2><span class="ic">⧉</span>Method: the seven levers</h2>
+    <ol class="play" id="playbook"></ol>
+  </div>
+
+  <div class="valid">
+    <span>Proof checks: 8 / 8 passing (JS 4 · Python 4)</span>
+    <span>GPT counts exact (o200k_base) · other models labelled estimates</span>
+    <span>Accuracy method and error table: ACCURACY.md in the repo</span>
+    <span>Status: public prototype · MIT licence</span>
+  </div>
+</div></div>
 
 <script>var module = { exports: {} };</script>
 <script>(function(){
@@ -546,73 +662,88 @@ module.exports = {
 
 })();</script>
 <script>
-  const core = module.exports;
-  document.getElementById('tLevels').textContent = Object.keys(core.CONTROL_LEVELS).length;
-  document.getElementById('tTypes').textContent = Object.keys(core.TASK_TYPES).length;
-  document.getElementById('tStrat').textContent = core.STRATEGIES.length;
-
-  const levelSel = document.getElementById('level');
-  Object.keys(core.CONTROL_LEVELS).forEach(k => {
-    const o = document.createElement('option');
-    o.value = k; o.textContent = core.CONTROL_LEVELS[k].label;
-    if (k === 'balanced') o.selected = true;
-    levelSel.appendChild(o);
-  });
-
+  const m = module.exports;
   const SAMPLES = [
-    { name: 'Wordy summary request', text: 'Please note that I would like you to please summarise the attached quarterly supplier performance report for me. The report is quite long and it contains a lot of detailed information about delivery performance and freight costs and capacity issues. Please keep your summary nice and short and please focus mainly on the most important key points that I really need to know about. Thank you very much in advance for your help with this.' },
-    { name: 'Polite draft request', text: 'Please kindly write a short email to the team in order to let them know that the meeting has been moved, please. As you know, it is important to note that the new time is 3pm on Thursday.' },
-    { name: 'The tiny prompt: "Write a strategy."', text: 'Write a strategy.' },
-    { name: 'Roadmap request with filler', text: 'As you know, it is important to note that we need a roadmap for the transformation programme, please. Please note that I would like you to please include phases and milestones in order to guide the board.' }
+    { name: 'Wordy summary request', text: 'Please could you kindly summarise the following incident report for me in a really clear and detailed way. The system went down at 3am and nobody could log in and there were lots of errors and it affected many users across several sites including Montreal and Toronto and people were very frustrated.' },
+    { name: 'Polite email draft', text: 'Write a polite email to the team explaining that the meeting has been moved to next week because several people are away and the room is not available and we need more time to prepare the materials and also remind them to bring their laptops and the latest reports and let me know if there are any problems with the new time or if anyone cannot make it.' },
+    { name: 'Tiny prompt, huge reply', text: 'Tell me everything about SAP.' },
+    { name: 'Detailed roadmap ask', text: 'Create a detailed roadmap for migrating our SAP landscape to the cloud including all phases, timelines, risks, resources, costs, governance, testing strategy, training plans, communication plans, rollback procedures, and success criteria, with examples for each section and explanations of why each step matters and what could go wrong if we skip it.' }
   ];
+  const sel = document.getElementById('sample');
+  SAMPLES.forEach((s, i) => { const o = document.createElement('option'); o.value = i; o.textContent = s.name; sel.appendChild(o); });
+  sel.value = '1';
+  document.getElementById('playbook').innerHTML = m.STRATEGIES.map(s => '<li><b style="color:#fff">' + s.name + '</b> (~' + s.typicalSaving + ') — ' + s.note + '</li>').join('');
 
-  function pairRows(el, rows, max) {
-    el.innerHTML = rows.map(r =>
-      '<div class="crow"><div class="nm">' + r.name + '</div><div>' +
-      '<div class="track" style="margin-bottom:3px"><div class="fill" style="width:' + (r.before / max * 100) + '%;background:#141310"></div></div>' +
-      '<div class="track"><div class="fill" style="width:' + (r.after / max * 100) + '%;background:#65a30d"></div></div>' +
-      '</div><div class="val">' + r.before + ' → ' + r.after + ' (' + r.pct + '% saved)</div></div>').join('');
-  }
+  let level = 'balanced';
+  const $ = id => document.getElementById(id);
+  const cost = v => '$' + (v < 0.1 ? v.toFixed(3) : v.toFixed(2));
+  const BAR_COLOURS = { original: '#a9c6f5', gentle: '#7aa7f0', balanced: 'linear-gradient(90deg,#7c3aed,#c084fc)', aggressive: '#cdbcf2' };
 
   function draw() {
-    const level = levelSel.value;
-    const rows = SAMPLES.map(s => {
-      const r = core.minimiseReport(s.text, 'gpt-6', { level });
-      return { name: s.name, before: r.totalBefore, after: r.totalAfter, pct: r.savedTotalPct };
+    const s = SAMPLES[parseInt(sel.value, 10)] || SAMPLES[0];
+    const r = m.minimiseReport(s.text, 'gpt-6', { level });
+
+    $('baBefore').textContent = r.totalBefore.toLocaleString();
+    $('baAfter').textContent = r.totalAfter.toLocaleString();
+    $('baBeforeSplit').textContent = 'Input ' + r.before + ' · reply ' + r.outputRange.low + '–' + r.outputRange.high;
+    $('baAfterSplit').textContent = 'Input ' + r.after + ' · reply capped at ' + r.outputAfter;
+    $('statCost').innerHTML = cost(r.savedCostTotalPerRun) + ' <span style="font-size:14px;color:var(--muted);font-weight:600">per run</span>';
+    $('statTok').textContent = '−' + r.savedTotalTokens.toLocaleString();
+    $('ringPct').textContent = r.savedTotalPct.toFixed(1) + '%';
+    $('donut').style.background = 'conic-gradient(#7c3aed 0%, #a855f7 ' + (r.savedTotalPct * 0.7) + '%, #c084fc ' + r.savedTotalPct + '%, #ece7fb ' + r.savedTotalPct + '%)';
+
+    const levels = ['gentle', 'balanced', 'aggressive'].map(lv => ({ lv, x: m.minimiseReport(s.text, 'gpt-6', { level: lv }) }));
+    $('lvlBody').innerHTML = levels.map(({ lv, x }) =>
+      '<tr class="lvl' + (lv === level ? ' sel' : '') + '" data-lv="' + lv + '"><td><span class="radio"></span><b>' +
+      m.CONTROL_LEVELS[lv].label + '</b></td><td>' + x.totalAfter.toLocaleString() + '</td>' +
+      '<td>−' + x.savedTotalPct.toFixed(1) + '%</td><td>' + cost(x.costAfterPerRun) + '</td></tr>').join('');
+    document.querySelectorAll('#lvlBody tr').forEach(tr => tr.addEventListener('click', () => { level = tr.getAttribute('data-lv'); draw(); }));
+
+    const rows = [{ k: 'original', label: 'Original', v: r.totalBefore },
+      ...levels.map(({ lv, x }) => ({ k: lv, label: m.CONTROL_LEVELS[lv].label, v: x.totalAfter }))];
+    const niceSteps = [100, 250, 500, 750, 1000, 1500, 2000, 2500, 3000, 5000];
+    const ceil = niceSteps.find(v => v >= r.totalBefore) || r.totalBefore;
+    $('bars').innerHTML = rows.map(row =>
+      '<div class="hbar"><div>' + row.label + '</div><div class="track"><div class="fill" style="width:' +
+      Math.max(1.5, (row.v / ceil) * 100) + '%;background:' + BAR_COLOURS[row.k] + '"></div></div>' +
+      '<div class="val">' + row.v.toLocaleString() + '</div></div>').join('');
+    $('axis').innerHTML = [0, 0.25, 0.5, 0.75, 1].map(f => '<span>' + Math.round(ceil * f).toLocaleString() + '</span>').join('');
+
+    const inChg = r.before ? Math.round((1 - r.after / r.before) * 100) : 0;
+    const outTyp = r.outputRange.typical;
+    const outChg = outTyp ? Math.round((1 - r.outputAfter / outTyp) * 100) : 0;
+    const chip = c => '<span style="background:#2f4413;color:#a3e635;font-weight:800;font-size:12.5px;border-radius:7px;padding:2px 9px">' + (c >= 0 ? '−' : '+') + Math.abs(c) + '%</span>';
+    const arow = (c, a, b, chg, note) =>
+      '<tr><td>' + c + '</td><td>' + a.toLocaleString() + '</td><td>' + b.toLocaleString() + '</td><td>' + chip(chg) + '</td><td style="color:var(--dmuted)">' + note + '</td></tr>';
+    $('anaBody').innerHTML =
+      arow('Input prompt', r.before, r.after, inChg, inChg >= 0 ? 'Filler and repetition stripped' : 'Control clause added; it pays for itself in the output cap') +
+      arow('Predicted output', outTyp, r.outputAfter, outChg, 'Explicit cap set by the ' + m.CONTROL_LEVELS[level].label + ' control level') +
+      arow('<b>Total (typical)</b>', r.totalBefore, r.totalAfter, r.savedTotalPct, '<b>Task detected: ' + r.taskLabel + '</b>');
+
+    const srows = SAMPLES.map(sm => {
+      const x = m.minimiseReport(sm.text, 'gpt-6', { level: 'balanced' });
+      return { name: sm.name, before: x.totalBefore, after: x.totalAfter, pct: x.savedTotalPct };
     });
-    pairRows(document.getElementById('saveChart'), rows, Math.max(...rows.map(r => r.before)));
-    const tiny = rows[2];
-    document.getElementById('saveNote').textContent =
-      'The tiny prompt costs ' + tiny.before + ' tokens uncontrolled, almost all of it reply. At ' +
-      core.CONTROL_LEVELS[level].label + ' control the minimiser brings it to ' + tiny.after +
-      '. Input minimising alone would have saved almost nothing there. That is the whole thesis in one row.';
-
-    const r = core.minimiseReport(SAMPLES[0].text, 'gpt-6', { level });
-    const max = Math.max(r.before, r.outputBefore);
-    document.getElementById('splitChart').innerHTML =
-      [['Input before', r.before], ['Input after (incl. control clause)', r.after],
-       ['Predicted output before', r.outputBefore], ['Output after (capped)', r.outputAfter]].map(x =>
-        '<div class="crow"><div class="nm">' + x[0] + '</div><div class="track"><div class="fill" style="width:' +
-        (x[1] / max * 100) + '%;background:' + (x[0].includes('output') || x[0].includes('Output') ? '#ea580c' : '#65a30d') +
-        '"></div></div><div class="val">' + x[1] + ' tokens</div></div>').join('');
+    const max = Math.max(...srows.map(x => x.before));
+    $('chart').innerHTML = srows.map(x =>
+      '<div class="crow"><div class="nm">' + x.name + '</div><div class="track2"><div class="pair">' +
+      '<div style="width:' + (x.before / max * 100) + '%;background:#7c3aed"></div></div>' +
+      '<div class="pair" style="margin-top:2px"><div style="width:' + (x.after / max * 100) + '%;background:#a3e635"></div></div></div>' +
+      '<div class="val">' + x.before.toLocaleString() + ' → ' + x.after.toLocaleString() + ' (−' + x.pct + '%)</div></div>').join('');
   }
-  document.getElementById('recalc').addEventListener('click', draw);
+  sel.addEventListener('change', draw);
   draw();
-
-  window.__refresh = function () { draw(); };
+  window.__refresh = draw;
 </script>
-
 <script>
-  // Load the REAL o200k_base tokenizer (GPT family) and wire it into the
-  // engine. If it loads, GPT counts on this page are exact, not estimated.
   (function () {
     var note = document.createElement('p');
-    note.className = 'note'; note.style.marginTop = '10px'; note.style.color = '#fbbf24';
+    note.className = 'note'; note.style.padding = '0 16px 18px'; note.style.maxWidth = '1180px'; note.style.margin = '0 auto';
     note.textContent = 'Counting: loading the real tokenizer…';
-    document.querySelector('header .in').appendChild(note);
+    document.body.appendChild(note);
     import('https://unpkg.com/gpt-tokenizer@4.1.0/esm/encoding/o200k_base.js')
-      .then(function (m) {
-        core.setExactCounter(function (t) { return m.encode(t).length; });
+      .then(function (mm) {
+        m.setExactCounter(function (t) { return mm.encode(t).length; });
         note.textContent = 'Counting: GPT models use the real o200k_base tokenizer — exact. Other models are estimates; measured errors are published in ACCURACY.md in the repo.';
         if (window.__refresh) window.__refresh();
       })
