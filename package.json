@@ -1,0 +1,1 @@
+{"description":"Shrink AI prompts without losing meaning — and count the saving.","license":"UNLICENSED","name":"token-minimiser","private":true,"scripts":{"demo":"node src/demo.js"},"type":"commonjs","version":"0.1.0"}
