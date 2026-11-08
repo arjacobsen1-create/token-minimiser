@@ -6,7 +6,11 @@ same job — with the saving counted.
 **Input:** a prompt. **Output:** a rewritten, smaller prompt, plus
 before/after tokens, % saved, and $ saved per model.
 
-This is a separate app from the **Token Estimator** on purpose:
+The Minimiser is also the third module of the **Token Estimator**
+product (AI cost planning and optimisation), where it runs inside the
+Estimator dashboard in that product's design. This standalone keeps
+its own site and design; the calculations are identical, because both
+run on one shared pricing and counting engine.
 
 | | Estimator | Minimiser |
 |---|---|---|
@@ -15,8 +19,7 @@ This is a separate app from the **Token Estimator** on purpose:
 | Input | Task / prompt + volume | A prompt |
 | Output | Counts and cost forecast | A smaller prompt + the saving |
 
-They are siblings: both use the same counting engine underneath.
-Different scope, different output, different app.
+Different scope, different output — one product, one engine.
 
 ## What it does
 
@@ -121,7 +124,7 @@ pass, the engine works. The command-line demo is `node src/demo.js`.
 
 ## A note on prices and counting
 
-Model prices in `src/minimiser-core.js` are editable defaults — verify
+Model prices in `src/shared-models.js` are editable defaults — verify
 against the provider's current pricing page. They were checked on
 8 Nov 2026, the same audit as the Estimator's table: GPT-6 Sol $2 / $10
 (GPT-6 Astra $10 / $50 as the premium option), Claude Haiku 5.5
