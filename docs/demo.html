@@ -111,7 +111,7 @@
   </div>
 
   <p class="note" id="countnote">Counting: loading the real tokenizer…</p>
-  <p class="note">Outputs are predicted from task type, not measured from a live model call; the method and the measured counting errors are published in ACCURACY.md in the repo. Dollar figures are API-equivalent at GPT-6 default prices; on a flat subscription they measure allowance burn, not a bill.</p>
+  <p class="note">Outputs are predicted from task type, not measured from a live model call; the method and the measured counting errors are published in ACCURACY.md in the repo. Dollar figures are API-equivalent at GPT-6 Sol default prices; on a flat subscription they measure allowance burn, not a bill.</p>
 </div>
 <p style="text-align:center;font-size:12px;color:#8b85ad;padding:20px 12px 28px;margin:0">Open source under the <a href="https://github.com/arjacobsen1-create/token-minimiser" style="color:#7c3aed">MIT License</a> · © 2026 Anahita Jacobsen</p>
 
@@ -165,12 +165,17 @@
 // Output is the expensive direction (here: 5x on the frontier models).
 // ---------------------------------------------------------------------------
 
+// Prices checked 2026-11-08 against the providers' published pricing
+// pages — same table as the Estimator, corrected the same day (an
+// illustrative $5/$25 "GPT-6" became GPT-6 Sol $2/$10, Astra added as
+// the premium option, Haiku 5.5 corrected to $0.10/$0.50).
 const MODELS = {
-  "gpt-6": { label: "GPT-6 (frontier)", charsPerToken: 4.0, inputPerMillion: 5.0, outputPerMillion: 25.0, tokenizer: "o200k_base" },
+  "gpt-6": { label: "GPT-6 Sol (frontier)", charsPerToken: 4.0, inputPerMillion: 2.0, outputPerMillion: 10.0, tokenizer: "o200k_base" },
+  "gpt-6-astra": { label: "GPT-6 Astra (premium frontier)", charsPerToken: 4.0, inputPerMillion: 10.0, outputPerMillion: 50.0, tokenizer: "o200k_base" },
   "claude-opus-5": { label: "Claude Opus 5 (frontier)", charsPerToken: 3.9, inputPerMillion: 5.0, outputPerMillion: 25.0 },
-  "claude-haiku-5-5": { label: "Claude Haiku 5.5 (fast/cheap)", charsPerToken: 3.9, inputPerMillion: 1.0, outputPerMillion: 5.0 },
-  "gemini-4-argon": { label: "Gemini 4 Argon (frontier)", charsPerToken: 4.1, inputPerMillion: 4.0, outputPerMillion: 20.0 },
-  "mercury-3": { label: "Mercury 3 (diffusion, speed)", charsPerToken: 4.0, inputPerMillion: 0.2, outputPerMillion: 0.7 },
+  "claude-haiku-5-5": { label: "Claude Haiku 5.5 (fast/cheap)", charsPerToken: 3.9, inputPerMillion: 0.1, outputPerMillion: 0.5, priceNote: "Rate for prompts up to 100K tokens; $0.50 / $2.50 above 100K." },
+  "gemini-4-argon": { label: "Gemini 4 Argon (frontier)", charsPerToken: 4.1, inputPerMillion: 4.0, outputPerMillion: 20.0, priceNote: "Standard rate from 1 Dec 2026; introductory $2 / $10 through 30 Nov 2026." },
+  "mercury-3": { label: "Mercury 3 (diffusion, speed)", charsPerToken: 4.0, inputPerMillion: 0.2, outputPerMillion: 0.7, priceNote: "List price; the launch promotion is half this." },
 };
 
 // ACCURACY (2026-11-08): the heuristic below was measured against real
@@ -615,7 +620,7 @@ module.exports = {
     $('stOut').innerHTML = r.outputRange.low.toLocaleString() + '–' + r.outputRange.high.toLocaleString() + ' → capped ' + r.outputAfter.toLocaleString();
     $('stTot').innerHTML = r.totalBefore.toLocaleString() + ' → ' + r.totalAfter.toLocaleString() + ' <span class="save">(−' + r.savedTotalPct + '%)</span>';
     $('stCost').innerHTML = cost(r.costBeforePerRun) + ' → ' + cost(r.costAfterPerRun);
-    $('taskline').textContent = 'Task detected: ' + r.taskLabel + ' · Control level: ' + m.CONTROL_LEVELS[level].label + ' · Model prices: GPT-6 defaults.';
+    $('taskline').textContent = 'Task detected: ' + r.taskLabel + ' · Control level: ' + m.CONTROL_LEVELS[level].label + ' · Model prices: GPT-6 Sol defaults.';
     $('prev').disabled = step === 0;
     $('next').style.display = step === STEPS.length - 1 ? 'none' : '';
     $('cta').style.display = step === STEPS.length - 1 ? 'flex' : 'none';
