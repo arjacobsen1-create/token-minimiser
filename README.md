@@ -47,7 +47,7 @@ node src/demo.js
 
 ## Status
 
-Private project, in development. A working prototype also exists as a web
+Public prototype, in development. A working prototype also exists as a web
 app; this repo is the real codebase that will be packaged for the App Store.
 
 ## A note on prices and counting
