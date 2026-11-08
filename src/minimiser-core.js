@@ -36,64 +36,16 @@
 "use strict";
 
 // ---------------------------------------------------------------------------
-// 1. COUNTING (shared with the Estimator app)
-// ---------------------------------------------------------------------------
-// v1 heuristic: tokens ≈ characters / charsPerToken, blended with a
-// word-based estimate (words / 0.75). Production swaps this one function
-// for each model's real tokenizer — nothing else changes.
-// Prices are EDITABLE DEFAULTS — verify before relying on a $ figure.
-// NOTE: models charge DIFFERENT prices for input and output tokens.
-// Output is the expensive direction (here: 5x on the frontier models).
+// 1. MODELS AND COUNTING — shared, not defined here.
+// The price table and the token counter live in ONE canonical place:
+// src/shared-models.js (byte-identical in the Estimator repo, the
+// canonical source). This engine imports them; the parity test fails
+// if the copies differ. NOTE: models charge DIFFERENT prices for
+// input and output tokens — output is the expensive direction.
 // ---------------------------------------------------------------------------
 
-// Prices checked 2026-11-08 against the providers' published pricing
-// pages — same table as the Estimator, corrected the same day (an
-// illustrative $5/$25 "GPT-6" became GPT-6 Sol $2/$10, Astra added as
-// the premium option, Haiku 5.5 corrected to $0.10/$0.50).
-const MODELS = {
-  "gpt-6": { label: "GPT-6 Sol (frontier)", charsPerToken: 4.0, inputPerMillion: 2.0, outputPerMillion: 10.0, tokenizer: "o200k_base" },
-  "gpt-6-astra": { label: "GPT-6 Astra (premium frontier)", charsPerToken: 4.0, inputPerMillion: 10.0, outputPerMillion: 50.0, tokenizer: "o200k_base" },
-  "claude-opus-5": { label: "Claude Opus 5 (frontier)", charsPerToken: 3.9, inputPerMillion: 5.0, outputPerMillion: 25.0 },
-  "claude-haiku-5-5": { label: "Claude Haiku 5.5 (fast/cheap)", charsPerToken: 3.9, inputPerMillion: 0.1, outputPerMillion: 0.5, priceNote: "Rate for prompts up to 100K tokens; $0.50 / $2.50 above 100K." },
-  "gemini-4-argon": { label: "Gemini 4 Argon (frontier)", charsPerToken: 4.1, inputPerMillion: 4.0, outputPerMillion: 20.0, priceNote: "Standard rate from 1 Dec 2026; introductory $2 / $10 through 30 Nov 2026." },
-  "mercury-3": { label: "Mercury 3 (diffusion, speed)", charsPerToken: 4.0, inputPerMillion: 0.2, outputPerMillion: 0.7, priceNote: "List price; the launch promotion is half this." },
-};
-
-// ACCURACY (2026-11-08): the heuristic below was measured against real
-// tokenizers on a golden set (see the Estimator repo's ACCURACY.md — the
-// two apps share this counter). It overstates long prose ~30% and
-// understates code/JSON/numbers 35–60%. So models with a published
-// tokenizer (GPT family, o200k_base) are counted EXACTLY once a real
-// counter is wired in via setExactCounter(); the rest stay labelled
-// estimates with the measured error published.
-let exactCounter = null;
-
-/** Wire in a real tokenizer: setExactCounter(text => encode(text).length). */
-function setExactCounter(fn) {
-  exactCounter = fn;
-}
-
-/** "exact" when a real tokenizer is wired for this model, else "estimate". */
-function countingMethod(modelId) {
-  const model = MODELS[modelId] || MODELS["gpt-6"];
-  return exactCounter && model.tokenizer ? "exact" : "estimate";
-}
-
-function countTokensHeuristic(text, modelId) {
-  if (!text) return 0;
-  const model = MODELS[modelId] || MODELS["gpt-6"];
-  const byChars = text.length / model.charsPerToken;
-  const words = text.trim().split(/\s+/).filter(Boolean).length;
-  const byWords = words / 0.75;
-  return Math.round((byChars + byWords) / 2);
-}
-
-function countTokens(text, modelId) {
-  if (!text) return 0;
-  const model = MODELS[modelId] || MODELS["gpt-6"];
-  if (exactCounter && model.tokenizer) return exactCounter(text);
-  return countTokensHeuristic(text, modelId);
-}
+const SHARED = require("./shared-models.js");
+const { MODELS, setExactCounter, countingMethod, countTokensHeuristic, countTokens } = SHARED;
 
 // ---------------------------------------------------------------------------
 // 2. WHAT DELIVERABLE IS BEING ASKED FOR? (output prediction)
