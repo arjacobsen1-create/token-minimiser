@@ -50,6 +50,20 @@ node src/demo.js
 Public prototype, in development. A working prototype also exists as a web
 app; this repo is the real codebase that will be packaged for the App Store.
 
+## Python version
+
+The same engine in Python lives in `python/minimiser_core.py`, held to
+the JavaScript engine's numbers by a parity check (counts, task types,
+output ranges, totals and the exact compressed text compared value for
+value during the port).
+
+```
+python3 python/test_smoke.py   the proof the port works (4 checks)
+```
+
+The JavaScript engine remains the one that powers the live web demo —
+the browser runs JavaScript natively, with no server.
+
 ## Live demo
 
 **https://arjacobsen1-create.github.io/token-minimiser/** — the app running in your browser, on the same engine as `src/`.
