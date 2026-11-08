@@ -22,53 +22,17 @@ def _round(x):
 
 # Prices checked 2026-11-08 against the providers' published pricing
 # pages — same table as the Estimator, corrected the same day.
-MODELS = {
-    "gpt-6": {"label": "GPT-6 Sol (frontier)", "charsPerToken": 4.0, "inputPerMillion": 2.0, "outputPerMillion": 10.0, "tokenizer": "o200k_base"},
-    "gpt-6-astra": {"label": "GPT-6 Astra (premium frontier)", "charsPerToken": 4.0, "inputPerMillion": 10.0, "outputPerMillion": 50.0, "tokenizer": "o200k_base"},
-    "claude-opus-5": {"label": "Claude Opus 5 (frontier)", "charsPerToken": 3.9, "inputPerMillion": 5.0, "outputPerMillion": 25.0},
-    "claude-haiku-5-5": {"label": "Claude Haiku 5.5 (fast/cheap)", "charsPerToken": 3.9, "inputPerMillion": 0.1, "outputPerMillion": 0.5, "priceNote": "Rate for prompts up to 100K tokens; $0.50 / $2.50 above 100K."},
-    "gemini-4-argon": {"label": "Gemini 4 Argon (frontier)", "charsPerToken": 4.1, "inputPerMillion": 4.0, "outputPerMillion": 20.0, "priceNote": "Standard rate from 1 Dec 2026; introductory $2 / $10 through 30 Nov 2026."},
-    "mercury-3": {"label": "Mercury 3 (diffusion, speed)", "charsPerToken": 4.0, "inputPerMillion": 0.2, "outputPerMillion": 0.7, "priceNote": "List price; the launch promotion is half this."},
-}
-
-
-# ACCURACY (2026-11-08): heuristic measured against real tokenizers on a
-# golden set (see the Estimator repo's ACCURACY.md — shared counter). It
-# overstates long prose ~30% and understates code/JSON/numbers 35-60%.
-# GPT-family models are counted EXACTLY once a real counter is wired in
-# via set_exact_counter(); the rest stay labelled estimates.
-_exact_counter = None
-
-
-def set_exact_counter(fn):
-    """Wire in a real tokenizer: set_exact_counter(fn) where fn(text)->int."""
-    global _exact_counter
-    _exact_counter = fn
-
-
-def counting_method(model_id=None):
-    """"exact" when a real tokenizer is wired for this model, else "estimate"."""
-    model = MODELS.get(model_id) or MODELS["gpt-6"]
-    return "exact" if (_exact_counter and model.get("tokenizer")) else "estimate"
-
-
-def count_tokens_heuristic(text, model_id=None):
-    if not text:
-        return 0
-    model = MODELS.get(model_id) or MODELS["gpt-6"]
-    by_chars = len(text) / model["charsPerToken"]
-    words = len(text.split())
-    by_words = words / 0.75
-    return _round((by_chars + by_words) / 2)
-
-
-def count_tokens(text, model_id=None):
-    if not text:
-        return 0
-    model = MODELS.get(model_id) or MODELS["gpt-6"]
-    if _exact_counter and model.get("tokenizer"):
-        return _exact_counter(text)
-    return count_tokens_heuristic(text, model_id)
+# Models and counting are shared, not defined here: they live in ONE
+# canonical place, shared_models.py (byte-identical in the Estimator
+# repo, the canonical source). The parity tests fail if the copies
+# ever differ.
+from shared_models import (
+    MODELS,
+    set_exact_counter,
+    counting_method,
+    count_tokens_heuristic,
+    count_tokens,
+)
 
 
 TASK_TYPES = {
