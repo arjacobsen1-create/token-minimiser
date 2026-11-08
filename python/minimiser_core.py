@@ -21,7 +21,7 @@ def _round(x):
 
 
 MODELS = {
-    "gpt-6": {"label": "GPT-6 (frontier)", "charsPerToken": 4.0, "inputPerMillion": 5.0, "outputPerMillion": 25.0},
+    "gpt-6": {"label": "GPT-6 (frontier)", "charsPerToken": 4.0, "inputPerMillion": 5.0, "outputPerMillion": 25.0, "tokenizer": "o200k_base"},
     "claude-opus-5": {"label": "Claude Opus 5 (frontier)", "charsPerToken": 3.9, "inputPerMillion": 5.0, "outputPerMillion": 25.0},
     "claude-haiku-5-5": {"label": "Claude Haiku 5.5 (fast/cheap)", "charsPerToken": 3.9, "inputPerMillion": 1.0, "outputPerMillion": 5.0},
     "gemini-4-argon": {"label": "Gemini 4 Argon (frontier)", "charsPerToken": 4.1, "inputPerMillion": 4.0, "outputPerMillion": 20.0},
@@ -29,7 +29,27 @@ MODELS = {
 }
 
 
-def count_tokens(text, model_id=None):
+# ACCURACY (2026-11-08): heuristic measured against real tokenizers on a
+# golden set (see the Estimator repo's ACCURACY.md — shared counter). It
+# overstates long prose ~30% and understates code/JSON/numbers 35-60%.
+# GPT-family models are counted EXACTLY once a real counter is wired in
+# via set_exact_counter(); the rest stay labelled estimates.
+_exact_counter = None
+
+
+def set_exact_counter(fn):
+    """Wire in a real tokenizer: set_exact_counter(fn) where fn(text)->int."""
+    global _exact_counter
+    _exact_counter = fn
+
+
+def counting_method(model_id=None):
+    """"exact" when a real tokenizer is wired for this model, else "estimate"."""
+    model = MODELS.get(model_id) or MODELS["gpt-6"]
+    return "exact" if (_exact_counter and model.get("tokenizer")) else "estimate"
+
+
+def count_tokens_heuristic(text, model_id=None):
     if not text:
         return 0
     model = MODELS.get(model_id) or MODELS["gpt-6"]
@@ -37,6 +57,15 @@ def count_tokens(text, model_id=None):
     words = len(text.split())
     by_words = words / 0.75
     return _round((by_chars + by_words) / 2)
+
+
+def count_tokens(text, model_id=None):
+    if not text:
+        return 0
+    model = MODELS.get(model_id) or MODELS["gpt-6"]
+    if _exact_counter and model.get("tokenizer"):
+        return _exact_counter(text)
+    return count_tokens_heuristic(text, model_id)
 
 
 TASK_TYPES = {
