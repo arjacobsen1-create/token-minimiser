@@ -3,58 +3,93 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Token Minimiser — Live Demo</title>
+<title>Token Minimiser — App</title>
 <style>
-  :root{--ink:#17203a;--muted:#5b6478;--line:#d9deea;--bg:#f6f7fb;--green:#059669;--amber:#b45309;--red:#dc2626}
+  :root{--ink:#17203a;--muted:#5b6478;--line:#d9deea;--bg:#f6f7fb;--green:#059669}
   *{box-sizing:border-box}
   body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
-  .wrap{max-width:860px;margin:0 auto;padding:24px 16px 44px}
-  h1{font-size:27px;margin:0 0 2px}
-  .byline{color:var(--amber);font-weight:700;font-size:13.5px;margin:0 0 14px}
-  .lede{color:var(--muted);font-size:15px;line-height:1.5;margin:0 0 18px}
+  header{background:#111827;color:#fff;padding:20px 16px 16px}
+  header .in{max-width:920px;margin:0 auto}
+  h1{font-size:26px;margin:0}
+  .byline{color:#fbbf24;font-weight:700;font-size:13px;margin:3px 0 8px}
+  header p{color:#cbd5e1;font-size:14.5px;line-height:1.5;margin:0;max-width:760px}
+  .wrap{max-width:920px;margin:0 auto;padding:18px 16px 44px}
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:0 0 14px}
+  .step{background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:11px 13px;font-size:13.5px;line-height:1.45}
+  .step b{color:var(--green)}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
   .card{background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:16px;margin:0 0 14px}
+  .card h2{margin:0 0 3px;font-size:18px}
+  .card .sub{color:var(--muted);font-size:13.5px;margin:0 0 8px;line-height:1.5}
   label{font-weight:700;font-size:13px;display:block;margin:10px 0 5px}
-  label:first-child{margin-top:0}
   textarea,select{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px;font-size:14.5px;font-family:inherit;background:#fff}
-  textarea{min-height:96px;resize:vertical}
+  textarea{min-height:220px;resize:vertical;line-height:1.5}
   button{appearance:none;border:0;border-radius:999px;background:var(--green);color:#fff;font-weight:800;font-size:15px;padding:12px 20px;cursor:pointer;margin-top:14px}
-  button.ghost{background:#eef2ff;color:#3730a3;border:1px solid #c7d2fe;margin-left:8px}
-  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px}
-  .stat{border:1px solid var(--line);border-radius:12px;padding:12px}
-  .stat .k{font-size:12px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
-  .stat .v{font-size:21px;font-weight:900;margin-top:3px}
-  .stat .s{font-size:13px;color:var(--muted);margin-top:2px;line-height:1.45}
-  .mini{background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:12px;font-size:14.5px;line-height:1.55;white-space:pre-wrap}
-  .saved{color:var(--green);font-weight:900}
+  button.ghost{background:#fff;color:var(--ink);border:1.5px solid var(--line);font-weight:700;font-size:13.5px;padding:9px 14px}
+  .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px}
+  .stat{border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+  .stat .k{font-size:11.5px;font-weight:800;letter-spacing:.06em;color:var(--muted);text-transform:uppercase}
+  .stat .v{font-size:19px;font-weight:900;margin-top:2px}
+  .stat .s{font-size:12px;color:var(--muted)}
+  .saved{color:var(--green)}
+  .mini{background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:12px;font-size:14px;line-height:1.55;white-space:pre-wrap}
+  .play{font-size:13.5px;line-height:1.5;margin:6px 0 0;padding-left:18px}
+  .play li{margin:3px 0}
   .note{font-size:13px;color:var(--muted);line-height:1.5}
-  #out{display:none}
-  @media(max-width:560px){.grid{grid-template-columns:1fr}}
+  @media(max-width:760px){.grid{grid-template-columns:1fr}.steps{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-<div class="wrap">
+<header><div class="in">
   <h1>Token Minimiser</h1>
-  <p class="byline">Built by Anahita Jacobsen · Live demo</p>
-  <p class="lede">Paste a prompt. The minimiser shrinks it, then does the part most tools skip: it predicts the <b>reply</b>, because a tiny prompt can trigger a huge, expensive answer. It minimises the total, input plus predicted output, and reports the saving as a range, framed by how you pay. Runs entirely in your browser, on the same engine as the code in this repo (<i>src/minimiser-core.js</i>, inlined into this page).</p>
-
-  <div class="card">
-    <label for="prompt">Your prompt</label>
-    <textarea id="prompt">Please note that I would like you to please summarise the attached report. As you know, it is important to note that we need the summary in order to brief the team. Please keep it short.</textarea>
-    <label for="model">Model</label>
-    <select id="model"></select>
-    <button id="go">Minimise</button>
-    <button class="ghost" id="tiny">Try the tiny prompt instead</button>
+  <p class="byline">Built by Anahita Jacobsen</p>
+  <p>Paste a prompt. The minimiser shrinks it, then does the part most tools skip: it predicts the <b>reply</b>, because a tiny prompt can trigger a huge, expensive answer. It minimises the total, input plus predicted output, and reports the saving as a range, framed by how you pay.</p>
+</div></header>
+<div class="wrap">
+  <div class="steps">
+    <div class="step"><b>1 · Paste</b> your prompt, exactly as you would send it.</div>
+    <div class="step"><b>2 · Choose control:</b> Gentle, Balanced or Aggressive, how hard the reply gets capped.</div>
+    <div class="step"><b>3 · Copy the minimised prompt</b> and send that instead. Same job, smaller bill.</div>
   </div>
 
-  <div class="card" id="out">
-    <div class="grid">
-      <div class="stat"><div class="k">Input</div><div class="v" id="inStat"></div><div class="s">Prompt tokens, before → after (the control clause can add a few, on purpose).</div></div>
-      <div class="stat"><div class="k">Predicted output</div><div class="v" id="outStat"></div><div class="s" id="outSub"></div></div>
-      <div class="stat"><div class="k">Total</div><div class="v" id="totStat"></div><div class="s" id="totSub"></div></div>
-      <div class="stat"><div class="k">Cost per run (API-equivalent)</div><div class="v" id="costStat"></div><div class="s">On a flat subscription the marginal cost is $0; tokens burn usage allowance instead. Both framings are in the full report in the code.</div></div>
+  <div class="grid">
+    <div class="card">
+      <h2>Your prompt</h2>
+      <p class="sub">Wordiness costs twice: once going in, and again in the reply it provokes.</p>
+      <textarea id="prompt">Please note that I would like you to please summarise the attached quarterly supplier performance report for me. The report is quite long and it contains a lot of detailed information about delivery performance and freight costs and capacity issues. Please keep your summary nice and short and please focus mainly on the most important key points that I really need to know about. Thank you very much in advance for your help with this.</textarea>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div><label for="model">Model</label><select id="model"></select></div>
+        <div><label for="level">Output control</label><select id="level"></select></div>
+      </div>
+      <button id="go">Minimise</button>
+      <button class="ghost" id="tiny">Try the tiny prompt lesson</button>
     </div>
-    <label>Minimised prompt</label>
-    <div class="mini" id="miniText"></div>
+
+    <div>
+      <div class="card" id="outCard" style="display:none">
+        <h2>The saving</h2>
+        <p class="sub" id="taskLine"></p>
+        <div class="stats">
+          <div class="stat"><div class="k">Input</div><div class="v" id="inStat"></div><div class="s">Prompt tokens, before → after. The control clause can add a few, on purpose.</div></div>
+          <div class="stat"><div class="k">Predicted output</div><div class="v" id="outStat"></div><div class="s">The reply, before → capped after. Reported as a range.</div></div>
+          <div class="stat"><div class="k">Total</div><div class="v" id="totStat"></div><div class="s">Input + output. The only number that matters.</div></div>
+          <div class="stat"><div class="k">Cost per run (API-equivalent)</div><div class="v" id="costStat"></div><div class="s">On a flat subscription the marginal cost is $0; tokens burn usage allowance instead.</div></div>
+        </div>
+      </div>
+      <div class="card" id="miniCard" style="display:none">
+        <h2>Minimised prompt</h2>
+        <p class="sub">Send this instead.</p>
+        <div class="mini" id="miniText"></div>
+        <button class="ghost" id="copy">Copy minimised prompt</button>
+        <span class="note" id="copied"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>The playbook</h2>
+    <p class="sub">The levers the minimiser applies, biggest first.</p>
+    <ul class="play" id="play"></ul>
   </div>
 
   <p class="note">Full code, lesson notes and a runnable proof (<i>node test/smoke.js</i>, 4 checks, including the tiny-prompt lesson) are in the repository. Prices are editable defaults in the code; counting is a calibrated heuristic.</p>
@@ -508,30 +543,37 @@ module.exports = {
     o.value = k; o.textContent = core.MODELS[k].label || k;
     modelSel.appendChild(o);
   });
+  const levelSel = document.getElementById('level');
+  Object.keys(core.CONTROL_LEVELS).forEach(k => {
+    const o = document.createElement('option');
+    o.value = k; o.textContent = core.CONTROL_LEVELS[k].label;
+    if (k === 'balanced') o.selected = true;
+    levelSel.appendChild(o);
+  });
+  document.getElementById('play').innerHTML = core.STRATEGIES.map(s =>
+    '<li><b>' + s.name + '</b> (~' + s.typicalSaving + ') — ' + s.note + '</li>').join('');
+
   function run() {
     const text = document.getElementById('prompt').value;
-    const r = core.minimiseReport(text, modelSel.value);
+    const r = core.minimiseReport(text, modelSel.value, { level: levelSel.value });
+    document.getElementById('taskLine').textContent = 'Task detected: ' + r.taskLabel + ' · Model: ' + (core.MODELS[modelSel.value].label || modelSel.value);
     document.getElementById('inStat').textContent = r.before + ' → ' + r.after;
-    document.getElementById('outStat').textContent =
-      (r.outputRange.low + '–' + r.outputRange.high) + ' → ' + r.outputAfter;
-    document.getElementById('outSub').textContent =
-      'Predicted reply range before, capped after. Task detected: ' + r.taskLabel + '.';
-    document.getElementById('totStat').innerHTML =
-      r.totalBefore + ' → ' + r.totalAfter + ' <span class="saved">(' + r.savedTotalPct + '% saved)</span>';
-    document.getElementById('totSub').textContent =
-      'Same work at volume: $' + r.costBeforePer1000Range.low.toFixed(0) + '–$' +
-      r.costBeforePer1000Range.high.toFixed(0) + ' per 1,000 runs before minimising.';
-    document.getElementById('costStat').textContent =
-      '$' + r.costBeforeRangePerRun.low.toFixed(3) + '–$' + r.costBeforeRangePerRun.high.toFixed(3) +
-      ' → $' + r.costAfterPerRun.toFixed(3);
+    document.getElementById('outStat').textContent = r.outputRange.low + '–' + r.outputRange.high + ' → ' + r.outputAfter;
+    document.getElementById('totStat').innerHTML = r.totalBefore + ' → ' + r.totalAfter + ' <span class="saved">(' + r.savedTotalPct + '% saved)</span>';
+document.getElementById('costStat').textContent = '$' + r.costBeforeRangePerRun.low.toFixed(3) + '–$' + r.costBeforeRangePerRun.high.toFixed(3) + ' → $' + r.costAfterPerRun.toFixed(3);
     document.getElementById('miniText').textContent = r.compressed;
-    document.getElementById('out').style.display = 'block';
+    document.getElementById('outCard').style.display = 'block';
+    document.getElementById('miniCard').style.display = 'block';
   }
   document.getElementById('go').addEventListener('click', run);
   document.getElementById('tiny').addEventListener('click', () => {
-    document.getElementById('prompt').value =
-      'I want a digital transformation pathway for a company with 1000 employees';
+    document.getElementById('prompt').value = 'Write a strategy.';
     run();
+  });
+  document.getElementById('copy').addEventListener('click', () => {
+    const t = document.getElementById('miniText').textContent;
+    if (navigator.clipboard) navigator.clipboard.writeText(t);
+    document.getElementById('copied').textContent = 'Copied.';
   });
   run();
 </script>
