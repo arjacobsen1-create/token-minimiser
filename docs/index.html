@@ -5,26 +5,26 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Token Minimiser — App</title>
 <style>
-  :root{--ink:#17203a;--muted:#5b6478;--line:#d9deea;--bg:#f6f7fb;--green:#059669}
+  :root{--ink:#1c1a15;--muted:#5b6478;--line:#ddd3ba;--bg:#f6f1e7;--green:#059669}
   *{box-sizing:border-box}
   body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
-  header{background:#111827;color:#fff;padding:20px 16px 16px}
+  header{background:#141310;color:#fff;padding:20px 16px 16px}
   header .in{max-width:920px;margin:0 auto}
   h1{font-size:26px;margin:0}
-  .byline{color:#fbbf24;font-weight:700;font-size:13px;margin:3px 0 8px}
+  .byline{color:#fb923c;font-weight:700;font-size:13px;margin:3px 0 8px}
   header p{color:#cbd5e1;font-size:14.5px;line-height:1.5;margin:0;max-width:760px}
   .wrap{max-width:920px;margin:0 auto;padding:18px 16px 44px}
   .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:0 0 14px}
-  .step{background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:11px 13px;font-size:13.5px;line-height:1.45}
-  .step b{color:var(--green)}
+  .step{background:#fffdf6;border:1.5px solid var(--line);border-radius:12px;padding:11px 13px;font-size:13.5px;line-height:1.45}
+  .step b{color:#ea580c}
   .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
-  .card{background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:16px;margin:0 0 14px}
+  .card{background:#fffdf6;border:1.5px solid var(--line);border-radius:14px;padding:16px;margin:0 0 14px}
   .card h2{margin:0 0 3px;font-size:18px}
   .card .sub{color:var(--muted);font-size:13.5px;margin:0 0 8px;line-height:1.5}
   label{font-weight:700;font-size:13px;display:block;margin:10px 0 5px}
   textarea,select{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px;font-size:14.5px;font-family:inherit;background:#fff}
   textarea{min-height:220px;resize:vertical;line-height:1.5}
-  button{appearance:none;border:0;border-radius:999px;background:var(--green);color:#fff;font-weight:800;font-size:15px;padding:12px 20px;cursor:pointer;margin-top:14px}
+  button{appearance:none;border:0;border-radius:999px;background:#ea580c;color:#fff;font-weight:800;font-size:15px;padding:12px 20px;cursor:pointer;margin-top:14px}
   button.ghost{background:#fff;color:var(--ink);border:1.5px solid var(--line);font-weight:700;font-size:13.5px;padding:9px 14px}
   .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px}
   .stat{border:1px solid var(--line);border-radius:12px;padding:10px 12px}
