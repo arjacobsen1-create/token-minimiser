@@ -55,6 +55,7 @@
   .dcard h2{margin:0 0 10px;font-size:16.5px;color:#fff}
   .dcard h2 .ic{color:var(--violet2);margin-right:7px}
   table{width:100%;border-collapse:collapse;font-size:14px;color:var(--dink)}
+  .tscroll{overflow-x:auto}
   th{color:var(--dmuted);font-weight:600;text-align:left;padding:7px 8px;border-bottom:1px solid var(--dline);font-size:12.5px}
   td{padding:11px 8px;border-bottom:1px solid var(--dline)}
   tr.lvl{cursor:pointer}
@@ -142,10 +143,10 @@
   <div class="two" id="levels">
     <div class="dcard" style="margin:0">
       <h2><span class="ic">⧉</span>Control Level Comparison</h2>
-      <table>
+      <div class="tscroll"><table>
         <tr><th>Control Level</th><th>Predicted Tokens</th><th>Reduction</th><th>Est. Cost per Run</th></tr>
         <tbody id="lvlBody"></tbody>
-      </table>
+      </table></div>
       <p class="note" style="margin-top:9px">Tap a row to make it the page's control level. More control saves more, and constrains the reply harder.</p>
     </div>
     <div class="dcard" style="margin:0">
@@ -159,10 +160,10 @@
   <div class="dcard" id="analysis">
     <h2><span class="ic">📄</span>Prompt Analysis</h2>
     <p class="sub2">Where the predicted saving comes from, for the selected sample and control level.</p>
-    <table>
+    <div class="tscroll"><table>
       <tr><th>Component</th><th>Original (tokens)</th><th>Optimised (tokens)</th><th>Change</th><th>Notes</th></tr>
       <tbody id="anaBody"></tbody>
-    </table>
+    </table></div>
   </div>
 
   <div class="dcard" id="examples">
