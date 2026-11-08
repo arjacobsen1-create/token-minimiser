@@ -50,6 +50,19 @@ node src/demo.js
 Public prototype, in development. A working prototype also exists as a web
 app; this repo is the real codebase that will be packaged for the App Store.
 
+## Live demo
+
+**https://arjacobsen1-create.github.io/token-minimiser/** — the app running in your browser, on the same engine as `src/`.
+
+## Verify it works
+
+```
+node test/smoke.js
+```
+
+Four checks, including the ones that encode this project's lessons. If they
+pass, the engine works. The command-line demo is `node src/demo.js`.
+
 ## A note on prices and counting
 
 Model prices in `src/minimiser-core.js` are editable defaults — verify
