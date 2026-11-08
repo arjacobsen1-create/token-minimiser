@@ -122,7 +122,10 @@ pass, the engine works. The command-line demo is `node src/demo.js`.
 ## A note on prices and counting
 
 Model prices in `src/minimiser-core.js` are editable defaults — verify
-against the provider's current pricing page. Counting runs two ways: a
+against the provider's current pricing page. They were checked on
+8 Nov 2026, the same audit as the Estimator's table: GPT-6 Sol $2 / $10
+(GPT-6 Astra $10 / $50 as the premium option), Claude Haiku 5.5
+$0.10 / $0.50 for prompts up to 100K tokens. Counting runs two ways: a
 calibrated heuristic by default, and exact counts for GPT models when the
 real o200k_base tokenizer is wired in (the live demo loads one). Other
 models stay labelled estimates; the measured error table is in ACCURACY.md.
