@@ -64,6 +64,14 @@ python3 python/test_smoke.py   the proof the port works (4 checks)
 The JavaScript engine remains the one that powers the live web demo —
 the browser runs JavaScript natively, with no server.
 
+## Accuracy
+
+Counts are not taken on faith. The counter is measured against the real
+tokenizers on a golden set, the errors are published in
+[ACCURACY.md](ACCURACY.md), GPT-family counts go exact when a real
+tokenizer is wired in (the live demo loads one), and every other count
+is labelled an estimate with its measured error.
+
 ## Live demo
 
 **https://arjacobsen1-create.github.io/token-minimiser/** — the app running in your browser, on the same engine as `src/`.
