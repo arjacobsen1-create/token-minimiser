@@ -67,8 +67,8 @@
       <p class="sub">Wordiness costs twice: once going in, and again in the reply it provokes.</p>
       <textarea id="prompt">Please note that I would like you to please summarise the attached quarterly supplier performance report for me. The report is quite long and it contains a lot of detailed information about delivery performance and freight costs and capacity issues. Please keep your summary nice and short and please focus mainly on the most important key points that I really need to know about. Thank you very much in advance for your help with this.</textarea>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-        <div><label for="model">Model</label><select id="model"></select></div>
-        <div><label for="level">Output control</label><select id="level"></select></div>
+        <div><label for="model">Model</label><select id="model"></select><p class="note" style="margin:4px 0 0">The minimised text is the same for every model. The model only changes the token counter and the prices.</p></div>
+        <div><label for="level">Output control</label><select id="level"></select><p class="note" id="levelNote" style="margin:4px 0 0;display:none"></p></div>
       </div>
       <button id="go">Minimise</button>
       <button class="ghost" id="tiny">Try the tiny prompt lesson</button>
@@ -79,7 +79,7 @@
         <h2>The saving</h2>
         <p class="sub" id="taskLine"></p>
         <div class="stats">
-          <div class="stat"><div class="k">Input</div><div class="v" id="inStat"></div><div class="s">Prompt tokens, before → after. The control clause can add a few, on purpose.</div></div>
+          <div class="stat"><div class="k">Input</div><div class="v" id="inStat"></div><div class="s">Prompt tokens: after compression, then the output-control clause added back, on purpose.</div></div>
           <div class="stat"><div class="k">Predicted output</div><div class="v" id="outStat"></div><div class="s">The reply, before → capped after. Reported as a range.</div></div>
           <div class="stat"><div class="k">Total</div><div class="v" id="totStat"></div><div class="s">Input + output. The only number that matters.</div></div>
           <div class="stat"><div class="k">Cost per run (API-equivalent)</div><div class="v" id="costStat"></div><div class="s">On a flat subscription the marginal cost is $0; tokens burn usage allowance instead.</div></div>
@@ -101,7 +101,7 @@
     <ul class="play" id="play"></ul>
   </div>
 
-  <p class="note">Full code, lesson notes and a runnable proof (<i>node test/smoke.js</i>, 4 checks, including the tiny-prompt lesson) are in the repository. Prices are editable defaults in the code. GPT-family counts are exact once the real tokenizer loads (see the note in the header); other models are estimates with measured errors published in ACCURACY.md in the Estimator repo.</p>
+  <p class="note">Full code, lesson notes and a runnable proof (<i>node test/smoke.js</i>, 7 checks, including the tiny-prompt lesson) are in the repository. Prices are editable defaults in the code. GPT-family counts are exact once the real tokenizer loads (see the note in the header); other models are estimates with measured errors published in ACCURACY.md in the Estimator repo.</p>
 </div>
 
 <script>var module = { exports: {} };</script>
@@ -426,6 +426,13 @@ const FILLER_PHRASES = [
   /\bkindly\b/gi,
   /\bas you know,?\b/gi,
   /\bit is important to note that\b/gi,
+  // Sentence-level politeness (added 2026-11-09): whole thank-you
+  // formulas are packaging, not payload — the word-level rules above
+  // never touched them, and the app's own sample prompt kept one.
+  /\bthank you very much in advance for your help( with this)?\.?/gi,
+  /\bthank you (very much|so much) for your help\.?/gi,
+  /\bthank you in advance\.?/gi,
+  /\bthanks in advance\.?/gi,
 ];
 
 function compressPrompt(text) {
@@ -459,7 +466,8 @@ function compressPrompt(text) {
 // Levels mirror the compression levels the app already offers:
 //   gentle   — keep ~70% of the typical answer
 //   balanced — keep ~50%
-//   aggressive — keep ~30% (never below a usable floor per type)
+//   aggressive — keep ~30% (the per-type floor halves at the hardest
+//              control: the cap can fall to half the floor, min 10)
 // The clause COSTS a few input tokens. The report counts that cost
 // honestly — total is what matters, not prompt length alone.
 // ---------------------------------------------------------------------------
@@ -476,7 +484,13 @@ function controlledOutput(taskType, predictedOutput, level = "balanced") {
   if (taskType === "translate" || taskType === "classify") return predictedOutput; // can't shrink these without losing the work
   const keep = (CONTROL_LEVELS[level] || CONTROL_LEVELS.balanced).keep;
   const floor = OUTPUT_FLOORS[taskType] || 50;
-  return Math.max(floor, Math.round(predictedOutput * keep));
+  // The floor is the GENTLE landing, not a wall for every level: a
+  // harder control must be able to land below it, or Balanced and
+  // Aggressive return the same cap on any short prompt (the demo
+  // showed exactly that — 50/50/50). Hard minimum: half the floor,
+  // never under 10.
+  const hardMin = Math.max(10, Math.round(floor * 0.5));
+  return Math.max(hardMin, Math.round(predictedOutput * keep));
 }
 
 function outputControlClause(taskType, targetTokens) {
@@ -525,6 +539,11 @@ function minimiseReport(text, modelId, opts = {}) {
 
   const inputBefore = countTokens(text, modelId);
   const inputAfter = countTokens(built.prompt, modelId); // includes the control clause's cost
+  // The two halves of "after", reported separately (2026-11-09): what
+  // compression alone achieves, and what the control clause costs.
+  // Merging them into one arrow made the input look like it GREW.
+  const inputCompressed = countTokens(built.compressed, modelId);
+  const clauseTokens = inputAfter - inputCompressed;
   const outputBefore = built.predictedOutput;
   const outputAfter = built.controlledOutput;
 
@@ -556,6 +575,8 @@ function minimiseReport(text, modelId, opts = {}) {
     // "before/after" have always meant the INPUT count)
     before: inputBefore,
     after: inputAfter,
+    inputCompressed, // input after compression alone, before the clause
+    clauseTokens, // the control clause's own cost (after − inputCompressed); 0 when there is no clause
     savedTokens: inputBefore - inputAfter, // can be negative — the clause costs input tokens on purpose
     savedPct: inputBefore ? Math.round(((inputBefore - inputAfter) / inputBefore) * 100) : 0,
     savedCostPerRun: (inputBefore - inputAfter) / 1e6 * model.inputPerMillion,
@@ -697,11 +718,27 @@ module.exports = {
   document.getElementById('play').innerHTML = core.STRATEGIES.map(s =>
     '<li><b>' + s.name + '</b> (~' + s.typicalSaving + ') — ' + s.note + '</li>').join('');
 
+  function inputStat(r) {
+    return r.clauseTokens > 0
+      ? r.before + ' → ' + r.inputCompressed + ' · +' + r.clauseTokens + ' clause = ' + r.after
+      : r.before + ' → ' + r.after;
+  }
+  function levelNoteText(r) {
+    if (r.taskType === 'translate' || r.taskType === 'classify')
+      return "Output control doesn't apply to translation or classification: the output is the work itself.";
+    const outs = ['gentle', 'balanced', 'aggressive'].map(lv => core.controlledOutput(r.taskType, r.outputBefore, lv));
+    return (outs[0] === outs[1] && outs[1] === outs[2])
+      ? 'This prompt is already at the minimum useful output for this task, so all three levels land on the same cap.'
+      : '';
+  }
   function run() {
     const text = document.getElementById('prompt').value;
     const r = core.minimiseReport(text, modelSel.value, { level: levelSel.value });
     document.getElementById('taskLine').textContent = 'Task detected: ' + r.taskLabel + ' · Model: ' + (core.MODELS[modelSel.value].label || modelSel.value);
-    document.getElementById('inStat').textContent = r.before + ' → ' + r.after;
+    document.getElementById('inStat').textContent = inputStat(r);
+    const lvNote = levelNoteText(r);
+    document.getElementById('levelNote').textContent = lvNote;
+    document.getElementById('levelNote').style.display = lvNote ? '' : 'none';
     document.getElementById('outStat').textContent = r.outputRange.low + '–' + r.outputRange.high + ' → ' + r.outputAfter;
     document.getElementById('totStat').innerHTML = r.totalBefore + ' → ' + r.totalAfter + ' <span class="saved">(' + r.savedTotalPct + '% saved)</span>';
 document.getElementById('costStat').textContent = '$' + r.costBeforeRangePerRun.low.toFixed(3) + '–$' + r.costBeforeRangePerRun.high.toFixed(3) + ' → $' + r.costAfterPerRun.toFixed(3);
