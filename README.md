@@ -61,7 +61,7 @@ output ranges, totals and the exact compressed text compared value for
 value during the port).
 
 ```
-python3 python/test_smoke.py   the proof the port works (4 checks)
+python3 python/test_smoke.py   the proof the port works (7 checks)
 ```
 
 The JavaScript engine remains the one that powers the live web demo —
@@ -119,7 +119,7 @@ units**, they are a direct forecast.
 node test/smoke.js
 ```
 
-Four checks, including the ones that encode this project's lessons. If they
+Seven checks, including the ones that encode this project's lessons. If they
 pass, the engine works. The command-line demo is `node src/demo.js`.
 
 ## A note on prices and counting
