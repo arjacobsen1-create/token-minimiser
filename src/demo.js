@@ -11,7 +11,9 @@ function show(text, modelIds = ["gpt-6"]) {
   for (const modelId of modelIds) {
     const r = minimiseReport(text, modelId);
     console.log(r.model + " — task detected: " + r.taskLabel);
-    console.log(`  Input:  ${r.before} -> ${r.after} tokens (the control clause can add a few — on purpose)`);
+    console.log(r.clauseTokens > 0
+      ? `  Input:  ${r.before} -> ${r.inputCompressed} · +${r.clauseTokens} clause = ${r.after} tokens`
+      : `  Input:  ${r.before} -> ${r.after} tokens`);
     console.log(`  Output: predicted ${r.outputBefore} (range ${r.outputRange.low}-${r.outputRange.high}) -> capped ${r.outputAfter} tokens`);
     console.log(`  TOTAL:  ${r.totalBefore} -> ${r.totalAfter} tokens (saved ${r.savedTotalPct}%)`);
     console.log(`  API-equivalent cost/run: $${r.costBeforeRangePerRun.low.toFixed(3)}-$${r.costBeforeRangePerRun.high.toFixed(3)} (typical $${r.costBeforePerRun.toFixed(3)}) -> $${r.costAfterPerRun.toFixed(3)} capped`);
