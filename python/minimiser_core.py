@@ -136,6 +136,12 @@ FILLER_PHRASES = [
     re.compile(r"\bkindly\b", re.I),
     re.compile(r"\bas you know,?\b", re.I),
     re.compile(r"\bit is important to note that\b", re.I),
+    # Sentence-level politeness (added 2026-11-09, mirrors the JS):
+    # whole thank-you formulas are packaging, not payload.
+    re.compile(r"\bthank you very much in advance for your help( with this)?\.?", re.I),
+    re.compile(r"\bthank you (very much|so much) for your help\.?", re.I),
+    re.compile(r"\bthank you in advance\.?", re.I),
+    re.compile(r"\bthanks in advance\.?", re.I),
 ]
 
 
@@ -170,7 +176,10 @@ def controlled_output(task_type, predicted_output, level="balanced"):
         return predicted_output  # can't shrink these without losing the work
     keep = (CONTROL_LEVELS.get(level) or CONTROL_LEVELS["balanced"])["keep"]
     floor = OUTPUT_FLOORS.get(task_type, 50)
-    return max(floor, _round(predicted_output * keep))
+    # Mirrors the JS: the floor is the gentle landing, not a wall for
+    # every level — hard minimum is half the floor, never under 10.
+    hard_min = max(10, _round(floor * 0.5))
+    return max(hard_min, _round(predicted_output * keep))
 
 
 def output_control_clause(task_type, target_tokens):
@@ -209,6 +218,10 @@ def minimise_report(text, model_id=None, task_type=None, level=None):
 
     input_before = count_tokens(text, model_id)
     input_after = count_tokens(built["prompt"], model_id)  # includes the control clause's cost
+    # The two halves of "after", reported separately (2026-11-09,
+    # mirrors the JS): compression alone, and the clause's own cost.
+    input_compressed = count_tokens(built["compressed"], model_id)
+    clause_tokens = input_after - input_compressed
     output_before = built["predictedOutput"]
     output_after = built["controlledOutput"]
 
@@ -238,6 +251,8 @@ def minimise_report(text, model_id=None, task_type=None, level=None):
         # Input side ("before/after" have always meant the INPUT count)
         "before": input_before,
         "after": input_after,
+        "input_compressed": input_compressed,  # input after compression alone, before the clause
+        "clause_tokens": clause_tokens,  # the control clause's own cost; 0 when there is no clause
         "savedTokens": input_before - input_after,  # can be negative — the clause costs input tokens on purpose
         "savedPct": _round(((input_before - input_after) / input_before) * 100) if input_before else 0,
         "savedCostPerRun": (input_before - input_after) / 1e6 * model["inputPerMillion"],
