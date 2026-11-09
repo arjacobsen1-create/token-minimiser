@@ -170,6 +170,13 @@ const FILLER_PHRASES = [
   /\bkindly\b/gi,
   /\bas you know,?\b/gi,
   /\bit is important to note that\b/gi,
+  // Sentence-level politeness (added 2026-11-09): whole thank-you
+  // formulas are packaging, not payload — the word-level rules above
+  // never touched them, and the app's own sample prompt kept one.
+  /\bthank you very much in advance for your help( with this)?\.?/gi,
+  /\bthank you (very much|so much) for your help\.?/gi,
+  /\bthank you in advance\.?/gi,
+  /\bthanks in advance\.?/gi,
 ];
 
 function compressPrompt(text) {
@@ -203,7 +210,8 @@ function compressPrompt(text) {
 // Levels mirror the compression levels the app already offers:
 //   gentle   — keep ~70% of the typical answer
 //   balanced — keep ~50%
-//   aggressive — keep ~30% (never below a usable floor per type)
+//   aggressive — keep ~30% (the per-type floor halves at the hardest
+//              control: the cap can fall to half the floor, min 10)
 // The clause COSTS a few input tokens. The report counts that cost
 // honestly — total is what matters, not prompt length alone.
 // ---------------------------------------------------------------------------
@@ -220,7 +228,13 @@ function controlledOutput(taskType, predictedOutput, level = "balanced") {
   if (taskType === "translate" || taskType === "classify") return predictedOutput; // can't shrink these without losing the work
   const keep = (CONTROL_LEVELS[level] || CONTROL_LEVELS.balanced).keep;
   const floor = OUTPUT_FLOORS[taskType] || 50;
-  return Math.max(floor, Math.round(predictedOutput * keep));
+  // The floor is the GENTLE landing, not a wall for every level: a
+  // harder control must be able to land below it, or Balanced and
+  // Aggressive return the same cap on any short prompt (the demo
+  // showed exactly that — 50/50/50). Hard minimum: half the floor,
+  // never under 10.
+  const hardMin = Math.max(10, Math.round(floor * 0.5));
+  return Math.max(hardMin, Math.round(predictedOutput * keep));
 }
 
 function outputControlClause(taskType, targetTokens) {
@@ -269,6 +283,11 @@ function minimiseReport(text, modelId, opts = {}) {
 
   const inputBefore = countTokens(text, modelId);
   const inputAfter = countTokens(built.prompt, modelId); // includes the control clause's cost
+  // The two halves of "after", reported separately (2026-11-09): what
+  // compression alone achieves, and what the control clause costs.
+  // Merging them into one arrow made the input look like it GREW.
+  const inputCompressed = countTokens(built.compressed, modelId);
+  const clauseTokens = inputAfter - inputCompressed;
   const outputBefore = built.predictedOutput;
   const outputAfter = built.controlledOutput;
 
@@ -300,6 +319,8 @@ function minimiseReport(text, modelId, opts = {}) {
     // "before/after" have always meant the INPUT count)
     before: inputBefore,
     after: inputAfter,
+    inputCompressed, // input after compression alone, before the clause
+    clauseTokens, // the control clause's own cost (after − inputCompressed); 0 when there is no clause
     savedTokens: inputBefore - inputAfter, // can be negative — the clause costs input tokens on purpose
     savedPct: inputBefore ? Math.round(((inputBefore - inputAfter) / inputBefore) * 100) : 0,
     savedCostPerRun: (inputBefore - inputAfter) / 1e6 * model.inputPerMillion,
